@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 2. Send email notification to navpreet8testing@gmail.com (fire-and-forget).
-    void sendEmailNotification({
+     await sendEmailNotification({
       type,
       name,
       email,
