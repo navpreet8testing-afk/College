@@ -1,0 +1,1012 @@
+     1→     1→     1→"use client";
+     2→     2→     2→
+     3→     3→     3→import { useEffect, useState } from "react";
+     4→     4→     4→import {
+     5→     5→     5→  CheckCircle2,
+     6→     6→     6→  Phone,
+     7→     7→     7→  Mail,
+     8→     8→     8→  Clock,
+     9→     9→     9→  ArrowRight,
+    10→    10→    10→  ChevronDown,
+    11→    11→    11→  BookOpen,
+    12→    12→    12→  Scale,
+    13→    13→    13→  Landmark,
+    14→    14→    14→  Atom,
+    15→    15→    15→  FlaskConical,
+    16→    16→    16→  Sigma,
+    17→    17→    17→  Leaf,
+    18→    18→    18→  BarChart3,
+    19→    19→    19→  Laptop,
+    20→    20→    20→  GraduationCap,
+    21→    21→    21→  Award,
+    22→    22→    22→  HeartHandshake,
+    23→    23→    23→  Users,
+    24→    24→    24→  Trophy,
+    25→    25→    25→  FileText,
+    26→    26→    26→  IdCard,
+    27→    27→    27→  Image as ImageIcon,
+    28→    28→    28→  ScrollText,
+    29→    29→    29→  FileCheck,
+    30→    30→    30→  MessageCircle,
+    31→    31→    31→} from "lucide-react";
+    32→    32→    32→import { useRouter, SOCIAL_LINKS } from "../router";
+    33→    33→    33→import { useScrollReveal } from "../hooks";
+    34→    34→    34→import {
+    35→    35→    35→  Section,
+    36→    36→    36→  SectionHeading,
+    37→    37→    37→  PageHero,
+    38→    38→    38→  NavOutlineButton,
+    39→    39→    39→} from "../ui";
+    40→    40→    40→import { SiteForm } from "../site-form";
+    41→    41→    41→
+    42→    42→    42→/* ----------------------------- assets ----------------------------- */
+    43→    43→    43→const HERO_IMG = "https://sfile.chatglm.cn/images-ppt/ef13916d9cc1.jpg";
+    44→    44→    44→
+    45→    45→    45→/* ----------------------------- data ----------------------------- */
+    46→    46→    46→const STEPS = [
+    47→    47→    47→  {
+    48→    48→    48→    num: "1",
+    49→    49→    49→    title: "Register Online",
+    50→    50→    50→    desc: "Create your account on the admission portal and complete the online registration form with your personal and academic details.",
+    51→    51→    51→  },
+    52→    52→    52→  {
+    53→    53→    53→    num: "2",
+    54→    54→    54→    title: "Submit Documents",
+    55→    55→    55→    desc: "Upload your 10+2 marksheet, ID proof, recent photograph and category certificate (if applicable) as per the checklist.",
+    56→    56→    56→  },
+    57→    57→    57→  {
+    58→    58→    58→    num: "3",
+    59→    59→    59→    title: "Merit & Counselling",
+    60→    60→    60→    desc: "Merit lists are published on the portal. Selected candidates attend counselling and in-person document verification.",
+    61→    61→    61→  },
+    62→    62→    62→  {
+    63→    63→    63→    num: "4",
+    64→    64→    64→    title: "Pay Fees & Enroll",
+    65→    65→    65→    desc: "Complete your fee payment securely online and confirm your seat. Welcome to the Shivaji College family!",
+    66→    66→    66→  },
+    67→    67→    67→];
+    68→    68→    68→
+    69→    69→    69→const ELIGIBILITY = [
+    70→    70→    70→  "Passed 10+2 (or equivalent) from a recognized board such as CBSE, ICSE or any State Board.",
+    71→    71→    71→  "Minimum 50% aggregate for UG Arts & Commerce programs (60% for Computer Science).",
+    72→    72→    72→  "Minimum 55% aggregate in the relevant Bachelor's degree for PG programs.",
+    73→    73→    73→  "Valid score in CUET (UG) / CUET (PG) as per Delhi University norms.",
+    74→    74→    74→  "5% relaxation in eligibility marks for SC / ST / OBC / PwD categories per government norms.",
+    75→    75→    75→  "International students may apply through the ICCR / Foreign Student Cell pathway.",
+    76→    76→    76→];
+    77→    77→    77→
+    78→    78→    78→interface Course {
+    79→    79→    79→  id: string;
+    80→    80→    80→  name: string;
+    81→    81→    81→  icon: typeof BookOpen;
+    82→    82→    82→  duration: string;
+    83→    83→    83→  fee: string;
+    84→    84→    84→  seats: number;
+    85→    85→    85→  eligibility: string;
+    86→    86→    86→  syllabus: string[];
+    87→    87→    87→}
+    88→    88→    88→
+    89→    89→    89→const COURSES: Course[] = [
+    90→    90→    90→  {
+    91→    91→    91→    id: "ba-eng",
+    92→    92→    92→    name: "B.A. (Hons) English",
+    93→    93→    93→    icon: BookOpen,
+    94→    94→    94→    duration: "3 Years",
+    95→    95→    95→    fee: "₹18,500",
+    96→    96→    96→    seats: 60,
+    97→    97→    97→    eligibility:
+    98→    98→    98→      "10+2 with 50% aggregate and English as a core subject. CUET (UG) qualified.",
+    99→    99→    99→    syllabus: [
+   100→   100→   100→      "English Literature from Chaucer to 18th Century",
+   101→   101→   101→      "Indian Writing in English & Translation",
+   102→   102→   102→      "Literary Criticism & Theory",
+   103→   103→   103→      "Poetry, Drama & Fiction Studies",
+   104→   104→   104→      "Research Methodology & Dissertation",
+   105→   105→   105→    ],
+   106→   106→   106→  },
+   107→   107→   107→  {
+   108→   108→   108→    id: "ba-ps",
+   109→   109→   109→    name: "B.A. (Hons) Political Science",
+   110→   110→   110→    icon: Scale,
+   111→   111→   111→    duration: "3 Years",
+   112→   112→   112→    fee: "₹18,500",
+   113→   113→   113→    seats: 60,
+   114→   114→   114→    eligibility:
+   115→   115→   115→      "10+2 with 50% aggregate. CUET (UG) qualified. Strong foundation in Social Sciences preferred.",
+   116→   116→   116→    syllabus: [
+   117→   117→   117→      "Political Theory & Concepts",
+   118→   118→   118→      "Indian Political System & Constitution",
+   119→   119→   119→      "International Relations & Foreign Policy",
+   120→   120→   120→      "Public Administration & Governance",
+   121→   121→   121→      "Comparative Politics & Research Methods",
+   122→   122→   122→    ],
+   123→   123→   123→  },
+   124→   124→   124→  {
+   125→   125→   125→    id: "ba-hist",
+   126→   126→   126→    name: "B.A. (Hons) History",
+   127→   127→   127→    icon: Landmark,
+   128→   128→   128→    duration: "3 Years",
+   129→   129→   129→    fee: "₹18,500",
+   130→   130→   130→    seats: 60,
+   131→   131→   131→    eligibility:
+   132→   132→   132→      "10+2 with 50% aggregate. CUET (UG) qualified. Interest in heritage & historiography encouraged.",
+   133→   133→   133→    syllabus: [
+   134→   134→   134→      "Ancient & Medieval Indian History",
+   135→   135→   135→      "Modern India & Freedom Struggle",
+   136→   136→   136→      "World History: Europe & Asia",
+   137→   137→   137→      "Historiography & Research Methods",
+   138→   138→   138→      "Dissertation on a Historical Theme",
+   139→   139→   139→    ],
+   140→   140→   140→  },
+   141→   141→   141→  {
+   142→   142→   142→    id: "bsc-phy",
+   143→   143→   143→    name: "B.Sc. (Hons) Physics",
+   144→   144→   144→    icon: Atom,
+   145→   145→   145→    duration: "3 Years",
+   146→   146→   146→    fee: "₹24,800",
+   147→   147→   147→    seats: 60,
+   148→   148→   148→    eligibility:
+   149→   149→   149→      "10+2 with PCM and 55% aggregate. CUET (UG) qualified. Mathematics compulsory.",
+   150→   150→   150→    syllabus: [
+   151→   151→   151→      "Classical & Analytical Mechanics",
+   152→   152→   152→      "Quantum Physics & Statistical Mechanics",
+   153→   153→   153→      "Thermodynamics & Optics",
+   154→   154→   154→      "Electromagnetism & Electronics",
+   155→   155→   155→      "Nuclear & Particle Physics Lab",
+   156→   156→   156→    ],
+   157→   157→   157→  },
+   158→   158→   158→  {
+   159→   159→   159→    id: "bsc-chem",
+   160→   160→   160→    name: "B.Sc. (Hons) Chemistry",
+   161→   161→   161→    icon: FlaskConical,
+   162→   162→   162→    duration: "3 Years",
+   163→   163→   163→    fee: "₹24,800",
+   164→   164→   164→    seats: 60,
+   165→   165→   165→    eligibility:
+   166→   166→   166→      "10+2 with PCB/PCM and 55% aggregate. CUET (UG) qualified. Chemistry compulsory.",
+   167→   167→   167→    syllabus: [
+   168→   168→   168→      "Organic Chemistry & Reaction Mechanisms",
+   169→   169→   169→      "Inorganic Chemistry & Coordination",
+   170→   170→   170→      "Physical Chemistry & Thermodynamics",
+   171→   171→   171→      "Analytical & Instrumental Methods",
+   172→   172→   172→      "Polymer Science & Industrial Chemistry",
+   173→   173→   173→    ],
+   174→   174→   174→  },
+   175→   175→   175→  {
+   176→   176→   176→    id: "bsc-math",
+   177→   177→   177→    name: "B.Sc. (Hons) Mathematics",
+   178→   178→   178→    icon: Sigma,
+   179→   179→   179→    duration: "3 Years",
+   180→   180→   180→    fee: "₹24,800",
+   181→   181→   181→    seats: 60,
+   182→   182→   182→    eligibility:
+   183→   183→   183→      "10+2 with PCM and 55% aggregate. CUET (UG) qualified. Strong aptitude in Mathematics essential.",
+   184→   184→   184→    syllabus: [
+   185→   185→   185→      "Calculus & Differential Equations",
+   186→   186→   186→      "Linear Algebra & Abstract Algebra",
+   187→   187→   187→      "Real & Complex Analysis",
+   188→   188→   188→      "Number Theory & Discrete Maths",
+   189→   189→   189→      "Numerical Methods & Programming",
+   190→   190→   190→    ],
+   191→   191→   191→  },
+   192→   192→   192→  {
+   193→   193→   193→    id: "bsc-bot",
+   194→   194→   194→    name: "B.Sc. (Hons) Botany",
+   195→   195→   195→    icon: Leaf,
+   196→   196→   196→    duration: "3 Years",
+   197→   197→   197→    fee: "₹24,800",
+   198→   198→   198→    seats: 60,
+   199→   199→   199→    eligibility:
+   200→   200→   200→      "10+2 with PCB and 55% aggregate. CUET (UG) qualified. Biology compulsory.",
+   201→   201→   201→    syllabus: [
+   202→   202→   202→      "Plant Physiology & Biochemistry",
+   203→   203→   203→      "Plant Taxonomy & Diversity",
+   204→   204→   204→      "Ecology & Environmental Botany",
+   205→   205→   205→      "Genetics & Plant Breeding",
+   206→   206→   206→      "Plant Biotechnology & Microbiology",
+   207→   207→   207→    ],
+   208→   208→   208→  },
+   209→   209→   209→  {
+   210→   210→   210→    id: "bcom",
+   211→   211→   211→    name: "B.Com (Hons)",
+   212→   212→   212→    icon: BarChart3,
+   213→   213→   213→    duration: "3 Years",
+   214→   214→   214→    fee: "₹21,200",
+   215→   215→   215→    seats: 120,
+   216→   216→   216→    eligibility:
+   217→   217→   217→      "10+2 with Commerce / Mathematics and 50% aggregate. CUET (UG) qualified.",
+   218→   218→   218→    syllabus: [
+   219→   219→   219→      "Financial Accounting & Reporting",
+   220→   220→   220→      "Business Statistics & Mathematics",
+   221→   221→   221→      "Corporate Law & Income Tax",
+   222→   222→   222→      "Micro & Macro Economics",
+   223→   223→   223→      "Marketing Management & Auditing",
+   224→   224→   224→    ],
+   225→   225→   225→  },
+   226→   226→   226→  {
+   227→   227→   227→    id: "bsc-cs",
+   228→   228→   228→    name: "B.Sc. Computer Science",
+   229→   229→   229→    icon: Laptop,
+   230→   230→   230→    duration: "3 Years",
+   231→   231→   231→    fee: "₹42,000",
+   232→   232→   232→    seats: 120,
+   233→   233→   233→    eligibility:
+   234→   234→   234→      "10+2 with PCM and 60% aggregate. CUET (UG) qualified. Mathematics compulsory.",
+   235→   235→   235→    syllabus: [
+   236→   236→   236→      "Programming in C, C++ & Python",
+   237→   237→   237→      "Data Structures & Algorithms",
+   238→   238→   238→      "Database Management Systems (DBMS)",
+   239→   239→   239→      "Operating Systems & Computer Networks",
+   240→   240→   240→      "Web Technologies & AI Foundations",
+   241→   241→   241→    ],
+   242→   242→   242→  },
+   243→   243→   243→  {
+   244→   244→   244→    id: "pg",
+   245→   245→   245→    name: "M.A. / M.Sc.",
+   246→   246→   246→    icon: GraduationCap,
+   247→   247→   247→    duration: "2 Years",
+   248→   248→   248→    fee: "₹28,500",
+   249→   249→   249→    seats: 60,
+   250→   250→   250→    eligibility:
+   251→   251→   251→      "Bachelor's degree in the relevant subject with 55% aggregate. CUET (PG) qualified.",
+   252→   252→   252→    syllabus: [
+   253→   253→   253→      "Advanced Specialization Papers",
+   254→   254→   254→      "Research Methodology & Statistics",
+   255→   255→   255→      "Dissertation / Thesis Work",
+   256→   256→   256→      "Seminars & Paper Presentations",
+   257→   257→   257→      "Industry / Field Project",
+   258→   258→   258→    ],
+   259→   259→   259→  },
+   260→   260→   260→];
+   261→   261→   261→
+   262→   262→   262→interface DateRow {
+   263→   263→   263→  event: string;
+   264→   264→   264→  date: string;
+   265→   265→   265→  status: "Open" | "Upcoming" | "Closed";
+   266→   266→   266→}
+   267→   267→   267→
+   268→   268→   268→const DATES: DateRow[] = [
+   269→   269→   269→  { event: "Online Registration Opens", date: "April 15, 2025", status: "Open" },
+   270→   270→   270→  { event: "Last Date to Apply", date: "May 30, 2025", status: "Upcoming" },
+   271→   271→   271→  { event: "Merit List Declaration", date: "June 10, 2025", status: "Upcoming" },
+   272→   272→   272→  { event: "Document Verification", date: "June 12 – 18, 2025", status: "Upcoming" },
+   273→   273→   273→  { event: "Fee Payment Deadline", date: "June 25, 2025", status: "Upcoming" },
+   274→   274→   274→  { event: "Semester Commences", date: "July 15, 2025", status: "Upcoming" },
+   275→   275→   275→];
+   276→   276→   276→
+   277→   277→   277→const STATUS_STYLES: Record<DateRow["status"], string> = {
+   278→   278→   278→  Open: "bg-green-100 text-green-700 ring-1 ring-green-200",
+   279→   279→   279→  Upcoming: "bg-[#d4a04c]/15 text-[#b8862f] ring-1 ring-[#d4a04c]/30",
+   280→   280→   280→  Closed: "bg-gray-200 text-gray-600 ring-1 ring-gray-300",
+   281→   281→   281→};
+   282→   282→   282→
+   283→   283→   283→const FEE_SUMMARY = [
+   284→   284→   284→  {
+   285→   285→   285→    tier: "Undergraduate",
+   286→   286→   286→    icon: GraduationCap,
+   287→   287→   287→    range: "₹18,500 – ₹42,000",
+   288→   288→   288→    note: "per year",
+   289→   289→   289→    programs: "B.A. (Hons), B.Sc. (Hons), B.Com (Hons), B.Sc. CS",
+   290→   290→   290→    desc: "3-year UG programs across Arts, Science, Commerce & Computer Science.",
+   291→   291→   291→  },
+   292→   292→   292→  {
+   293→   293→   293→    tier: "Postgraduate",
+   294→   294→   294→    icon: BookOpen,
+   295→   295→   295→    range: "₹28,500 – ₹35,000",
+   296→   296→   296→    note: "per year",
+   297→   297→   297→    programs: "M.A., M.Sc., M.Com",
+   298→   298→   298→    desc: "2-year master's programs with specialization, dissertation & seminars.",
+   299→   299→   299→  },
+   300→   300→   300→  {
+   301→   301→   301→    tier: "Research",
+   302→   302→   302→    icon: FlaskConical,
+   303→   303→   303→    range: "₹35,000 – ₹50,000",
+   304→   304→   304→    note: "per year",
+   305→   305→   305→    programs: "M.Phil & Ph.D.",
+   306→   306→   306→    desc: "Doctoral research across 6 thrust areas with fellowship support.",
+   307→   307→   307→  },
+   308→   308→   308→];
+   309→   309→   309→
+   310→   310→   310→const SCHOLARSHIPS = [
+   311→   311→   311→  {
+   312→   312→   312→    icon: Award,
+   313→   313→   313→    title: "Merit Scholarship",
+   314→   314→   314→    desc: "Up to 100% tuition waiver for students with 90%+ in qualifying exams.",
+   315→   315→   315→  },
+   316→   316→   316→  {
+   317→   317→   317→    icon: HeartHandshake,
+   318→   318→   318→    title: "Need-based Aid",
+   319→   319→   319→    desc: "Financial assistance for students from economically weaker sections.",
+   320→   320→   320→  },
+   321→   321→   321→  {
+   322→   322→   322→    icon: Users,
+   323→   323→   323→    title: "SC / ST / OBC",
+   324→   324→   324→    desc: "Government scholarships & fee concessions for reserved categories.",
+   325→   325→   325→  },
+   326→   326→   326→  {
+   327→   327→   327→    icon: Trophy,
+   328→   328→   328→    title: "Sports & ECA",
+   329→   329→   329→    desc: "Relaxation & awards for national-level sports and cultural achievers.",
+   330→   330→   330→  },
+   331→   331→   331→];
+   332→   332→   332→
+   333→   333→   333→const DOCUMENTS = [
+   334→   334→   334→  { icon: FileText, label: "10+2 Marksheet (Original + Copy)" },
+   335→   335→   335→  { icon: IdCard, label: "Government ID Proof (Aadhaar / PAN)" },
+   336→   336→   336→  { icon: ImageIcon, label: "Recent Passport-size Photograph" },
+   337→   337→   337→  { icon: ScrollText, label: "Caste Certificate (if applicable)" },
+   338→   338→   338→  { icon: FileCheck, label: "Migration Certificate (from previous board)" },
+   339→   339→   339→];
+   340→   340→   340→
+   341→   341→   341→const PROGRAM_OPTIONS = [
+   342→   342→   342→  "B.A. English",
+   343→   343→   343→  "B.A. Pol Science",
+   344→   344→   344→  "B.A. History",
+   345→   345→   345→  "B.Sc. Physics",
+   346→   346→   346→  "B.Sc. Chemistry",
+   347→   347→   347→  "B.Sc. Maths",
+   348→   348→   348→  "B.Sc. Botany",
+   349→   349→   349→  "B.Com",
+   350→   350→   350→  "B.Sc. CS",
+   351→   351→   351→  "M.A./M.Sc.",
+   352→   352→   352→  "Ph.D.",
+   353→   353→   353→  "Other",
+   354→   354→   354→];
+   355→   355→   355→
+   356→   356→   356→const CATEGORY_OPTIONS = ["General", "OBC", "SC", "ST", "EWS"];
+   357→   357→   357→
+   358→   358→   358→/* ----------------------------- component ----------------------------- */
+   359→   359→   359→export function AdmissionsPage() {
+   360→   360→   360→  const { navigate } = useRouter();
+   361→   361→   361→  const revealRef = useScrollReveal<HTMLDivElement>();
+   362→   362→   362→  const [openCourse, setOpenCourse] = useState<string | null>(COURSES[0].id);
+   363→   363→   363→
+   364→   364→   364→  // Force-add is-visible to above-the-fold reveals shortly after mount.
+   365→   365→   365→  useEffect(() => {
+   366→   366→   366→    const t = window.setTimeout(() => {
+   367→   367→   367→      document
+   368→   368→   368→        .querySelectorAll(".reveal:not(.is-visible), .reveal-stagger:not(.is-visible)")
+   369→   369→   369→        .forEach((el) => {
+   370→   370→   370→          const r = el.getBoundingClientRect();
+   371→   371→   371→          if (r.top < window.innerHeight) el.classList.add("is-visible");
+   372→   372→   372→        });
+   373→   373→   373→    }, 100);
+   374→   374→   374→    return () => window.clearTimeout(t);
+   375→   375→   375→  }, []);
+   376→   376→   376→
+   377→   377→   377→  const scrollToForm = () => {
+   378→   378→   378→    document
+   379→   379→   379→      .getElementById("apply-form")
+   380→   380→   380→      ?.scrollIntoView({ behavior: "smooth", block: "start" });
+   381→   381→   381→  };
+   382→   382→   382→
+   383→   383→   383→  return (
+   384→   384→   384→    <div ref={revealRef} className="page-enter">
+   385→   385→   385→      {/* ===== 1. HERO ===== */}
+   386→   386→   386→      <PageHero
+   387→   387→   387→        eyebrow="Admissions 2025-26"
+   388→   388→   388→        title={
+   389→   389→   389→          <>
+   390→   390→   390→            Join <span style={{ color: "#d4a04c" }}>Shivaji College</span>
+   391→   391→   391→          </>
+   392→   392→   392→        }
+   393→   393→   393→        description="Begin your journey with us. Applications for 2025-26 are now open — explore 25+ programs and apply in 4 simple steps."
+   394→   394→   394→        image={HERO_IMG}
+   395→   395→   395→      />
+   396→   396→   396→
+   397→   397→   397→      {/* ===== 2. PROCESS STEPS (glassmorphism) ===== */}
+   398→   398→   398→      <Section bg="white">
+   399→   399→   399→        <div className="reveal">
+   400→   400→   400→          <SectionHeading
+   401→   401→   401→            eyebrow="Process"
+   402→   402→   402→            title={
+   403→   403→   403→              <>
+   404→   404→   404→                How to <span style={{ color: "#d4a04c" }}>Apply</span>
+   405→   405→   405→              </>
+   406→   406→   406→            }
+   407→   407→   407→            description="A simple, transparent four-step admission process — from registration to enrollment."
+   408→   408→   408→            align="center"
+   409→   409→   409→          />
+   410→   410→   410→        </div>
+   411→   411→   411→
+   412→   412→   412→        <div className="reveal-stagger mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+   413→   413→   413→          {STEPS.map((s) => (
+   414→   414→   414→            <div
+   415→   415→   415→              key={s.num}
+   416→   416→   416→              className="card-lift group flex flex-col items-center rounded-2xl border border-white/40 bg-white/70 p-7 text-center shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-xl"
+   417→   417→   417→            >
+   418→   418→   418→              <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#d4a04c] to-[#b8862f] shadow-lg shadow-[#d4a04c]/30 transition-transform duration-300 group-hover:scale-105">
+   419→   419→   419→                <span className="font-serif text-[34px] font-extrabold text-white">
+   420→   420→   420→                  {s.num}
+   421→   421→   421→                </span>
+   422→   422→   422→              </div>
+   423→   423→   423→              <h3 className="mt-5 font-serif text-[19px] font-bold text-[#1a2744]">
+   424→   424→   424→                {s.title}
+   425→   425→   425→              </h3>
+   426→   426→   426→              <p className="mt-2 font-sans text-[14px] leading-relaxed text-[#5a6478]">
+   427→   427→   427→                {s.desc}
+   428→   428→   428→              </p>
+   429→   429→   429→            </div>
+   430→   430→   430→          ))}
+   431→   431→   431→        </div>
+   432→   432→   432→      </Section>
+   433→   433→   433→
+   434→   434→   434→      {/* ===== 3. ELIGIBILITY CRITERIA (muted, glass) ===== */}
+   435→   435→   435→      <Section bg="muted">
+   436→   436→   436→        <div className="grid grid-cols-1 items-center gap-10 lg:grid-cols-2 lg:gap-16">
+   437→   437→   437→          <div className="reveal">
+   438→   438→   438→            <SectionHeading
+   439→   439→   439→              eyebrow="Eligibility"
+   440→   440→   440→              title={
+   441→   441→   441→                <>
+   442→   442→   442→                  Are you <span style={{ color: "#d4a04c" }}>eligible?</span>
+   443→   443→   443→                </>
+   444→   444→   444→              }
+   445→   445→   445→              description="Review the criteria below to confirm you meet the requirements for admission to Shivaji College."
+   446→   446→   446→            />
+   447→   447→   447→            <p className="mt-6 font-sans text-[15px] leading-relaxed text-[#5a6478]">
+   448→   448→   448→              Eligibility is determined per Delhi University & CUET norms.
+   449→   449→   449→              Reserved-category candidates receive relaxation as per government
+   450→   450→   450→              policy. When in doubt, our admissions office is happy to help.
+   451→   451→   451→            </p>
+   452→   452→   452→            <button
+   453→   453→   453→              onClick={scrollToForm}
+   454→   454→   454→              className="btn-gold mt-7 inline-flex items-center gap-2 rounded-md bg-[#d4a04c] px-6 py-3 font-sans text-[14px] font-semibold text-white"
+   455→   455→   455→            >
+   456→   456→   456→              Check & Apply
+   457→   457→   457→              <ArrowRight className="h-4 w-4" />
+   458→   458→   458→            </button>
+   459→   459→   459→          </div>
+   460→   460→   460→
+   461→   461→   461→          <div className="reveal">
+   462→   462→   462→            <div className="rounded-2xl border border-white/40 bg-white/70 p-7 shadow-sm backdrop-blur-md sm:p-8">
+   463→   463→   463→              <h3 className="font-serif text-[18px] font-bold text-[#1a2744]">
+   464→   464→   464→                Eligibility Checklist
+   465→   465→   465→              </h3>
+   466→   466→   466→              <ul className="mt-5 space-y-4">
+   467→   467→   467→                {ELIGIBILITY.map((point) => (
+   468→   468→   468→                  <li key={point} className="flex items-start gap-3">
+   469→   469→   469→                    <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-[#d4a04c]" />
+   470→   470→   470→                    <span className="font-sans text-[15px] leading-relaxed text-[#1a2744]">
+   471→   471→   471→                      {point}
+   472→   472→   472→                    </span>
+   473→   473→   473→                  </li>
+   474→   474→   474→                ))}
+   475→   475→   475→              </ul>
+   476→   476→   476→            </div>
+   477→   477→   477→          </div>
+   478→   478→   478→        </div>
+   479→   479→   479→      </Section>
+   480→   480→   480→
+   481→   481→   481→      {/* ===== 4. COURSES OFFERED — EXPANSION PANELS ===== */}
+   482→   482→   482→      <Section bg="white">
+   483→   483→   483→        <div className="reveal">
+   484→   484→   484→          <SectionHeading
+   485→   485→   485→            eyebrow="Courses"
+   486→   486→   486→            title={
+   487→   487→   487→              <>
+   488→   488→   488→                <span style={{ color: "#d4a04c" }}>Programs</span> &amp; Fees
+   489→   489→   489→              </>
+   490→   490→   490→            }
+   491→   491→   491→            description="10 flagship programs across Arts, Science, Commerce & Computer Science. Tap any course to view eligibility, seats, syllabus highlights and apply."
+   492→   492→   492→            align="center"
+   493→   493→   493→          />
+   494→   494→   494→        </div>
+   495→   495→   495→
+   496→   496→   496→        <div className="reveal-stagger mx-auto mt-12 flex max-w-4xl flex-col gap-4">
+   497→   497→   497→          {COURSES.map((c, i) => {
+   498→   498→   498→            const isOpen = openCourse === c.id;
+   499→   499→   499→            const Icon = c.icon;
+   500→   500→   500→            return (
+   501→   501→   501→              <div
+   502→   502→   502→                key={c.id}
+   503→   503→   503→                className="overflow-hidden rounded-2xl border border-white/40 bg-white/70 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-lg"
+   504→   504→   504→              >
+   505→   505→   505→                {/* Collapsed header */}
+   506→   506→   506→                <button
+   507→   507→   507→                  type="button"
+   508→   508→   508→                  onClick={() =>
+   509→   509→   509→                    setOpenCourse((prev) => (prev === c.id ? null : c.id))
+   510→   510→   510→                  }
+   511→   511→   511→                  aria-expanded={isOpen}
+   512→   512→   512→                  className="flex w-full items-center gap-4 px-5 py-5 text-left transition-colors hover:bg-white/40 sm:px-6"
+   513→   513→   513→                >
+   514→   514→   514→                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#1a2744]/5 ring-1 ring-[#1a2744]/5">
+   515→   515→   515→                    <Icon className="h-6 w-6 text-[#d4a04c]" />
+   516→   516→   516→                  </span>
+   517→   517→   517→
+   518→   518→   518→                  <span className="min-w-0 flex-1">
+   519→   519→   519→                    <span className="block font-serif text-[16px] font-bold leading-snug text-[#1a2744] sm:text-[18px]">
+   520→   520→   520→                      {c.name}
+   521→   521→   521→                    </span>
+   522→   522→   522→                    <span className="mt-1 flex flex-wrap items-center gap-2 font-sans text-[12px] text-[#5a6478]">
+   523→   523→   523→                      <span className="inline-flex items-center gap-1 rounded-full bg-[#1a2744]/5 px-2.5 py-0.5 font-medium text-[#1a2744]">
+   524→   524→   524→                        <Clock className="h-3 w-3" />
+   525→   525→   525→                        {c.duration}
+   526→   526→   526→                      </span>
+   527→   527→   527→                      <span className="inline-flex items-center gap-1 rounded-full bg-[#1a2744]/5 px-2.5 py-0.5 font-medium text-[#1a2744]">
+   528→   528→   528→                        <Users className="h-3 w-3" />
+   529→   529→   529→                        {c.seats} seats
+   530→   530→   530→                      </span>
+   531→   531→   531→                    </span>
+   532→   532→   532→                  </span>
+   533→   533→   533→
+   534→   534→   534→                  <span className="shrink-0 text-right">
+   535→   535→   535→                    <span className="block font-serif text-[18px] font-extrabold text-[#d4a04c] sm:text-[20px]">
+   536→   536→   536→                      {c.fee}
+   537→   537→   537→                    </span>
+   538→   538→   538→                    <span className="block font-sans text-[11px] text-[#b8862f]">
+   539→   539→   539→                      / year
+   540→   540→   540→                    </span>
+   541→   541→   541→                  </span>
+   542→   542→   542→
+   543→   543→   543→                  <ChevronDown
+   544→   544→   544→                    className={`h-5 w-5 shrink-0 text-[#1a2744] transition-transform duration-300 ${
+   545→   545→   545→                      isOpen ? "rotate-180" : ""
+   546→   546→   546→                    }`}
+   547→   547→   547→                  />
+   548→   548→   548→                </button>
+   549→   549→   549→
+   550→   550→   550→                {/* Expanded body — smooth grid-rows animation */}
+   551→   551→   551→                <div
+   552→   552→   552→                  className={`grid transition-all duration-300 ease-out ${
+   553→   553→   553→                    isOpen
+   554→   554→   554→                      ? "grid-rows-[1fr] opacity-100"
+   555→   555→   555→                      : "grid-rows-[0fr] opacity-0"
+   556→   556→   556→                  }`}
+   557→   557→   557→                >
+   558→   558→   558→                  <div className="overflow-hidden">
+   559→   559→   559→                    <div className="border-t border-[#1a2744]/10 px-5 py-6 sm:px-6">
+   560→   560→   560→                      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+   561→   561→   561→                        {/* Eligibility + seats */}
+   562→   562→   562→                        <div>
+   563→   563→   563→                          <h4 className="font-sans text-[12px] font-semibold uppercase tracking-[0.16em] text-[#d4a04c]">
+   564→   564→   564→                            Eligibility
+   565→   565→   565→                          </h4>
+   566→   566→   566→                          <p className="mt-2 font-sans text-[14px] leading-relaxed text-[#1a2744]">
+   567→   567→   567→                            {c.eligibility}
+   568→   568→   568→                          </p>
+   569→   569→   569→
+   570→   570→   570→                          <div className="mt-5 flex flex-wrap gap-3">
+   571→   571→   571→                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#1a2744]/5 px-3 py-2 font-sans text-[13px] font-medium text-[#1a2744]">
+   572→   572→   572→                              <Clock className="h-4 w-4 text-[#d4a04c]" />
+   573→   573→   573→                              Duration: {c.duration}
+   574→   574→   574→                            </span>
+   575→   575→   575→                            <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#1a2744]/5 px-3 py-2 font-sans text-[13px] font-medium text-[#1a2744]">
+   576→   576→   576→                              <Users className="h-4 w-4 text-[#d4a04c]" />
+   577→   577→   577→                              Intake: {c.seats} seats
+   578→   578→   578→                            </span>
+   579→   579→   579→                          </div>
+   580→   580→   580→                        </div>
+   581→   581→   581→
+   582→   582→   582→                        {/* Syllabus highlights */}
+   583→   583→   583→                        <div>
+   584→   584→   584→                          <h4 className="font-sans text-[12px] font-semibold uppercase tracking-[0.16em] text-[#d4a04c]">
+   585→   585→   585→                            Syllabus Highlights
+   586→   586→   586→                          </h4>
+   587→   587→   587→                          <ul className="mt-2 space-y-2.5">
+   588→   588→   588→                            {c.syllabus.map((item) => (
+   589→   589→   589→                              <li
+   590→   590→   590→                                key={item}
+   591→   591→   591→                                className="flex items-start gap-2.5"
+   592→   592→   592→                              >
+   593→   593→   593→                                <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-r from-[#d4a04c] to-[#b8862f]" />
+   594→   594→   594→                                <span className="font-sans text-[14px] leading-relaxed text-[#1a2744]">
+   595→   595→   595→                                  {item}
+   596→   596→   596→                                </span>
+   597→   597→   597→                              </li>
+   598→   598→   598→                            ))}
+   599→   599→   599→                          </ul>
+   600→   600→   600→                        </div>
+   601→   601→   601→                      </div>
+   602→   602→   602→
+   603→   603→   603→                      {/* Action buttons */}
+   604→   604→   604→                      <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-[#1a2744]/10 pt-5">
+   605→   605→   605→                        <button
+   606→   606→   606→                          onClick={scrollToForm}
+   607→   607→   607→                          className="btn-gold inline-flex items-center gap-2 rounded-md bg-gradient-to-r from-[#d4a04c] to-[#b8862f] px-6 py-2.5 font-sans text-[13px] font-semibold text-white shadow-sm shadow-[#d4a04c]/30"
+   608→   608→   608→                        >
+   609→   609→   609→                          Apply for this course
+   610→   610→   610→                          <ArrowRight className="h-4 w-4" />
+   611→   611→   611→                        </button>
+   612→   612→   612→                        <button
+   613→   613→   613→                          onClick={() => navigate("contact")}
+   614→   614→   614→                          className="btn-outline inline-flex items-center gap-2 rounded-md border border-[#1a2744] px-6 py-2.5 font-sans text-[13px] font-semibold text-[#1a2744] hover:bg-[#1a2744] hover:text-white"
+   615→   615→   615→                        >
+   616→   616→   616→                          Enquire
+   617→   617→   617→                        </button>
+   618→   618→   618→                        <span className="ml-auto font-sans text-[12px] text-[#5a6478]">
+   619→   619→   619→                          Course #{(i + 1).toString().padStart(2, "0")} · 2025-26
+   620→   620→   620→                        </span>
+   621→   621→   621→                      </div>
+   622→   622→   622→                    </div>
+   623→   623→   623→                  </div>
+   624→   624→   624→                </div>
+   625→   625→   625→              </div>
+   626→   626→   626→            );
+   627→   627→   627→          })}
+   628→   628→   628→        </div>
+   629→   629→   629→      </Section>
+   630→   630→   630→
+   631→   631→   631→      {/* ===== 5. IMPORTANT DATES (muted, glass table) ===== */}
+   632→   632→   632→      <Section bg="muted">
+   633→   633→   633→        <div className="reveal">
+   634→   634→   634→          <SectionHeading
+   635→   635→   635→            eyebrow="Schedule"
+   636→   636→   636→            title={
+   637→   637→   637→              <>
+   638→   638→   638→                Important <span style={{ color: "#d4a04c" }}>Dates</span>
+   639→   639→   639→              </>
+   640→   640→   640→            }
+   641→   641→   641→            description="Mark your calendar with the key milestones of the 2025-26 admission cycle."
+   642→   642→   642→            align="center"
+   643→   643→   643→          />
+   644→   644→   644→        </div>
+   645→   645→   645→
+   646→   646→   646→        <div className="reveal mt-10 overflow-hidden rounded-2xl border border-white/40 bg-white/70 shadow-sm backdrop-blur-md">
+   647→   647→   647→          <div className="overflow-x-auto">
+   648→   648→   648→            <table className="w-full border-collapse text-left">
+   649→   649→   649→              <thead>
+   650→   650→   650→                <tr className="bg-[#1a2744]">
+   651→   651→   651→                  <th className="px-5 py-4 font-sans text-[12px] font-semibold uppercase tracking-[0.14em] text-white sm:px-6">
+   652→   652→   652→                    Event
+   653→   653→   653→                  </th>
+   654→   654→   654→                  <th className="px-5 py-4 font-sans text-[12px] font-semibold uppercase tracking-[0.14em] text-white sm:px-6">
+   655→   655→   655→                    Date
+   656→   656→   656→                  </th>
+   657→   657→   657→                  <th className="px-5 py-4 font-sans text-[12px] font-semibold uppercase tracking-[0.14em] text-white sm:px-6">
+   658→   658→   658→                    Status
+   659→   659→   659→                  </th>
+   660→   660→   660→                </tr>
+   661→   661→   661→              </thead>
+   662→   662→   662→              <tbody>
+   663→   663→   663→                {DATES.map((row, idx) => (
+   664→   664→   664→                  <tr
+   665→   665→   665→                    key={row.event}
+   666→   666→   666→                    className={
+   667→   667→   667→                      idx % 2 === 0
+   668→   668→   668→                        ? "bg-white/40"
+   669→   669→   669→                        : "bg-[#f7f5f0]/40"
+   670→   670→   670→                    }
+   671→   671→   671→                  >
+   672→   672→   672→                    <td className="px-5 py-4 font-serif text-[14px] font-bold text-[#1a2744] sm:px-6 sm:text-[15px]">
+   673→   673→   673→                      {row.event}
+   674→   674→   674→                    </td>
+   675→   675→   675→                    <td className="px-5 py-4 font-sans text-[14px] text-[#5a6478] sm:px-6">
+   676→   676→   676→                      {row.date}
+   677→   677→   677→                    </td>
+   678→   678→   678→                    <td className="px-5 py-4 sm:px-6">
+   679→   679→   679→                      <span
+   680→   680→   680→                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-sans text-[12px] font-semibold ${STATUS_STYLES[row.status]}`}
+   681→   681→   681→                      >
+   682→   682→   682→                        <span
+   683→   683→   683→                          className={`h-1.5 w-1.5 rounded-full ${
+   684→   684→   684→                            row.status === "Open"
+   685→   685→   685→                              ? "bg-green-500"
+   686→   686→   686→                              : row.status === "Upcoming"
+   687→   687→   687→                              ? "bg-[#d4a04c]"
+   688→   688→   688→                              : "bg-gray-400"
+   689→   689→   689→                          }`}
+   690→   690→   690→                        />
+   691→   691→   691→                        {row.status}
+   692→   692→   692→                      </span>
+   693→   693→   693→                    </td>
+   694→   694→   694→                  </tr>
+   695→   695→   695→                ))}
+   696→   696→   696→              </tbody>
+   697→   697→   697→            </table>
+   698→   698→   698→          </div>
+   699→   699→   699→        </div>
+   700→   700→   700→      </Section>
+   701→   701→   701→
+   702→   702→   702→      {/* ===== 6. FEE STRUCTURE SUMMARY (white, glass) ===== */}
+   703→   703→   703→      <Section bg="white">
+   704→   704→   704→        <div className="reveal">
+   705→   705→   705→          <SectionHeading
+   706→   706→   706→            eyebrow="Fees"
+   707→   707→   707→            title={
+   708→   708→   708→              <>
+   709→   709→   709→                Transparent <span style={{ color: "#d4a04c" }}>Fee Structure</span>
+   710→   710→   710→              </>
+   711→   711→   711→            }
+   712→   712→   712→            description="Annual tuition fee ranges across undergraduate, postgraduate and research programs. No hidden charges."
+   713→   713→   713→            align="center"
+   714→   714→   714→          />
+   715→   715→   715→        </div>
+   716→   716→   716→
+   717→   717→   717→        <div className="reveal-stagger mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+   718→   718→   718→          {FEE_SUMMARY.map((f) => {
+   719→   719→   719→            const Icon = f.icon;
+   720→   720→   720→            return (
+   721→   721→   721→              <div
+   722→   722→   722→                key={f.tier}
+   723→   723→   723→                className="card-lift flex flex-col rounded-2xl border border-white/40 bg-white/70 p-7 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-xl"
+   724→   724→   724→              >
+   725→   725→   725→                <div className="flex items-center justify-between">
+   726→   726→   726→                  <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#1a2744]/5">
+   727→   727→   727→                    <Icon className="h-6 w-6 text-[#d4a04c]" />
+   728→   728→   728→                  </span>
+   729→   729→   729→                  <span className="font-sans text-[11px] font-semibold uppercase tracking-[0.16em] text-[#5a6478]">
+   730→   730→   730→                    {f.tier}
+   731→   731→   731→                  </span>
+   732→   732→   732→                </div>
+   733→   733→   733→
+   734→   734→   734→                <h3 className="mt-5 font-serif text-[20px] font-bold text-[#1a2744]">
+   735→   735→   735→                  {f.programs}
+   736→   736→   736→                </h3>
+   737→   737→   737→
+   738→   738→   738→                <div className="mt-4 flex items-baseline gap-2">
+   739→   739→   739→                  <span className="bg-gradient-to-r from-[#d4a04c] to-[#b8862f] bg-clip-text font-serif text-[32px] font-extrabold leading-none text-transparent sm:text-[36px]">
+   740→   740→   740→                    {f.range}
+   741→   741→   741→                  </span>
+   742→   742→   742→                  <span className="font-sans text-[13px] font-medium text-[#b8862f]">
+   743→   743→   743→                    {f.note}
+   744→   744→   744→                  </span>
+   745→   745→   745→                </div>
+   746→   746→   746→
+   747→   747→   747→                <div className="my-5 h-px w-full bg-[#1a2744]/10" />
+   748→   748→   748→
+   749→   749→   749→                <p className="font-sans text-[14px] leading-relaxed text-[#5a6478]">
+   750→   750→   750→                  {f.desc}
+   751→   751→   751→                </p>
+   752→   752→   752→
+   753→   753→   753→                <button
+   754→   754→   754→                  onClick={scrollToForm}
+   755→   755→   755→                  className="mt-6 inline-flex items-center gap-1.5 self-start font-sans text-[13px] font-semibold text-[#d4a04c] transition-colors hover:text-[#b8862f]"
+   756→   756→   756→                >
+   757→   757→   757→                  Apply for {f.tier}
+   758→   758→   758→                  <ArrowRight className="h-4 w-4" />
+   759→   759→   759→                </button>
+   760→   760→   760→              </div>
+   761→   761→   761→            );
+   762→   762→   762→          })}
+   763→   763→   763→        </div>
+   764→   764→   764→      </Section>
+   765→   765→   765→
+   766→   766→   766→      {/* ===== 7. SCHOLARSHIPS (navy, glassmorphism) ===== */}
+   767→   767→   767→      <Section bg="navy">
+   768→   768→   768→        <div className="reveal">
+   769→   769→   769→          <SectionHeading
+   770→   770→   770→            eyebrow="Scholarships"
+   771→   771→   771→            title={
+   772→   772→   772→              <>
+   773→   773→   773→                <span style={{ color: "#d4a04c" }}>Financial</span> Support
+   774→   774→   774→              </>
+   775→   775→   775→            }
+   776→   776→   776→            description="We believe merit and dreams should never be held back by finances. Four scholarship pathways are available."
+   777→   777→   777→            align="center"
+   778→   778→   778→            light
+   779→   779→   779→          />
+   780→   780→   780→        </div>
+   781→   781→   781→
+   782→   782→   782→        <div className="reveal-stagger mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+   783→   783→   783→          {SCHOLARSHIPS.map((s) => {
+   784→   784→   784→            const Icon = s.icon;
+   785→   785→   785→            return (
+   786→   786→   786→              <div
+   787→   787→   787→                key={s.title}
+   788→   788→   788→                className="card-lift flex flex-col rounded-2xl border border-white/15 bg-white/[0.06] p-6 backdrop-blur-md transition-all duration-300 hover:border-[#d4a04c]/40 hover:bg-white/[0.09]"
+   789→   789→   789→              >
+   790→   790→   790→                <span className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-[#d4a04c]/15 ring-1 ring-[#d4a04c]/25">
+   791→   791→   791→                  <Icon className="h-6 w-6 text-[#d4a04c]" />
+   792→   792→   792→                </span>
+   793→   793→   793→                <h3 className="mt-5 font-serif text-[18px] font-bold text-white">
+   794→   794→   794→                  {s.title}
+   795→   795→   795→                </h3>
+   796→   796→   796→                <p className="mt-2 font-sans text-[14px] leading-relaxed text-white/70">
+   797→   797→   797→                  {s.desc}
+   798→   798→   798→                </p>
+   799→   799→   799→              </div>
+   800→   800→   800→            );
+   801→   801→   801→          })}
+   802→   802→   802→        </div>
+   803→   803→   803→
+   804→   804→   804→        <div className="reveal mt-10 flex justify-center">
+   805→   805→   805→          <button
+   806→   806→   806→            onClick={() => navigate("contact")}
+   807→   807→   807→            className="btn-outline inline-flex items-center gap-2 rounded-md border border-white px-6 py-3 font-sans text-[14px] font-semibold text-white hover:bg-white hover:text-[#1a2744]"
+   808→   808→   808→          >
+   809→   809→   809→            Ask about scholarship eligibility
+   810→   810→   810→            <ArrowRight className="h-4 w-4" />
+   811→   811→   811→          </button>
+   812→   812→   812→        </div>
+   813→   813→   813→      </Section>
+   814→   814→   814→
+   815→   815→   815→      {/* ===== 8. APPLY NOW CTA + FORM (white) ===== */}
+   816→   816→   816→      <Section bg="white" className="!pt-20">
+   817→   817→   817→        <div id="apply-form" className="reveal -mt-4 scroll-mt-24">
+   818→   818→   818→          <SectionHeading
+   819→   819→   819→            eyebrow="Apply"
+   820→   820→   820→            title={
+   821→   821→   821→              <>
+   822→   822→   822→                <span style={{ color: "#d4a04c" }}>Apply Now</span>
+   823→   823→   823→              </>
+   824→   824→   824→            }
+   825→   825→   825→            description="Submit your admission enquiry and our team will reach out within 24 hours to guide you through the next steps."
+   826→   826→   826→            align="center"
+   827→   827→   827→          />
+   828→   828→   828→        </div>
+   829→   829→   829→
+   830→   830→   830→        <div className="mt-12 grid grid-cols-1 gap-8 lg:grid-cols-2">
+   831→   831→   831→          {/* LEFT — glass FormCard */}
+   832→   832→   832→          <div className="reveal">
+   833→   833→   833→            <div className="rounded-2xl border border-white/40 bg-white/70 p-6 shadow-sm backdrop-blur-md sm:p-8">
+   834→   834→   834→              <h3 className="font-serif text-[20px] font-bold text-[#1a2744]">
+   835→   835→   835→                Admission Enquiry Form
+   836→   836→   836→              </h3>
+   837→   837→   837→              <p className="mt-1 font-sans text-[14px] text-[#5a6478]">
+   838→   838→   838→                Fields marked with <span className="text-[#d4a04c]">*</span> are
+   839→   839→   839→                required.
+   840→   840→   840→              </p>
+   841→   841→   841→              <div className="mt-5">
+   842→   842→   842→                <SiteForm
+   843→   843→   843→                  type="admissions"
+   844→   844→   844→                  submitLabel="Submit Application Enquiry"
+   845→   845→   845→                  successTitle="Application enquiry received!"
+   846→   846→   846→                  successMessage="Your application enquiry has been received and forwarded to navpreet8testing@gmail.com. Our admissions team will contact you within 24 hours."
+   847→   847→   847→                  fields={[
+   848→   848→   848→                    {
+   849→   849→   849→                      name: "name",
+   850→   850→   850→                      label: "Full Name",
+   851→   851→   851→                      type: "text",
+   852→   852→   852→                      required: true,
+   853→   853→   853→                      placeholder: "e.g. Aarav Sharma",
+   854→   854→   854→                    },
+   855→   855→   855→                    {
+   856→   856→   856→                      name: "email",
+   857→   857→   857→                      label: "Email Address",
+   858→   858→   858→                      type: "email",
+   859→   859→   859→                      required: true,
+   860→   860→   860→                      placeholder: "you@example.com",
+   861→   861→   861→                    },
+   862→   862→   862→                    {
+   863→   863→   863→                      name: "phone",
+   864→   864→   864→                      label: "Phone Number",
+   865→   865→   865→                      type: "tel",
+   866→   866→   866→                      required: true,
+   867→   867→   867→                      placeholder: "+91 98XXX XXXXX",
+   868→   868→   868→                    },
+   869→   869→   869→                    {
+   870→   870→   870→                      name: "program",
+   871→   871→   871→                      label: "Program of Interest",
+   872→   872→   872→                      type: "select",
+   873→   873→   873→                      required: true,
+   874→   874→   874→                      options: PROGRAM_OPTIONS,
+   875→   875→   875→                    },
+   876→   876→   876→                    {
+   877→   877→   877→                      name: "category",
+   878→   878→   878→                      label: "Category",
+   879→   879→   879→                      type: "select",
+   880→   880→   880→                      required: true,
+   881→   881→   881→                      options: CATEGORY_OPTIONS,
+   882→   882→   882→                    },
+   883→   883→   883→                    {
+   884→   884→   884→                      name: "message",
+   885→   885→   885→                      label: "Message (optional)",
+   886→   886→   886→                      type: "textarea",
+   887→   887→   887→                      rows: 4,
+   888→   888→   888→                      placeholder:
+   889→   889→   889→                        "Tell us about your academic background, marks or any questions you have...",
+   890→   890→   890→                    },
+   891→   891→   891→                  ]}
+   892→   892→   892→                  meta={{ source: "admissions-page" }}
+   893→   893→   893→                />
+   894→   894→   894→              </div>
+   895→   895→   895→            </div>
+   896→   896→   896→          </div>
+   897→   897→   897→
+   898→   898→   898→          {/* RIGHT — navy glass info card */}
+   899→   899→   899→          <div className="reveal">
+   900→   900→   900→            <div className="flex h-full flex-col rounded-2xl border border-white/15 bg-gradient-to-br from-[#1a2744]/95 to-[#2a3a5c]/95 p-7 shadow-xl backdrop-blur-xl sm:p-8">
+   901→   901→   901→              <h3 className="font-serif text-[20px] font-bold text-white">
+   902→   902→   902→                Admissions Office
+   903→   903→   903→              </h3>
+   904→   904→   904→              <p className="mt-1 font-sans text-[14px] text-white/70">
+   905→   905→   905→                Reach us directly — we&apos;re here to help.
+   906→   906→   906→              </p>
+   907→   907→   907→
+   908→   908→   908→              <div className="mt-6 space-y-4">
+   909→   909→   909→                <a
+   910→   910→   910→                  href="mailto:admissions@shivajicollege.edu.in"
+   911→   911→   911→                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 transition-colors hover:bg-white/[0.08]"
+   912→   912→   912→                >
+   913→   913→   913→                  <Mail className="h-5 w-5 shrink-0 text-[#d4a04c]" />
+   914→   914→   914→                  <span className="font-sans text-[14px] font-medium text-white">
+   915→   915→   915→                    admissions@shivajicollege.edu.in
+   916→   916→   916→                  </span>
+   917→   917→   917→                </a>
+   918→   918→   918→                <a
+   919→   919→   919→                  href="tel:+911125692768"
+   920→   920→   920→                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3 transition-colors hover:bg-white/[0.08]"
+   921→   921→   921→                >
+   922→   922→   922→                  <Phone className="h-5 w-5 shrink-0 text-[#d4a04c]" />
+   923→   923→   923→                  <span className="font-sans text-[14px] font-medium text-white">
+   924→   924→   924→                    +91 11 2569 2768
+   925→   925→   925→                  </span>
+   926→   926→   926→                </a>
+   927→   927→   927→                <a
+   928→   928→   928→                  href={SOCIAL_LINKS.whatsapp}
+   929→   929→   929→                  target="_blank"
+   930→   930→   930→                  rel="noopener noreferrer"
+   931→   931→   931→                  className="flex items-center gap-3 rounded-xl border border-[#25D366]/30 bg-[#25D366]/10 px-4 py-3 transition-colors hover:bg-[#25D366]/20"
+   932→   932→   932→                >
+   933→   933→   933→                  <MessageCircle className="h-5 w-5 shrink-0 text-[#25D366]" />
+   934→   934→   934→                  <span className="font-sans text-[14px] font-medium text-white">
+   935→   935→   935→                    Chat on WhatsApp
+   936→   936→   936→                  </span>
+   937→   937→   937→                </a>
+   938→   938→   938→                <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-3">
+   939→   939→   939→                  <Clock className="h-5 w-5 shrink-0 text-[#d4a04c]" />
+   940→   940→   940→                  <span className="font-sans text-[14px] font-medium text-white">
+   941→   941→   941→                    Mon – Sat · 9:00 AM – 5:00 PM
+   942→   942→   942→                  </span>
+   943→   943→   943→                </div>
+   944→   944→   944→              </div>
+   945→   945→   945→
+   946→   946→   946→              {/* Documents needed */}
+   947→   947→   947→              <div className="mt-7 border-t border-white/10 pt-6">
+   948→   948→   948→                <h4 className="font-sans text-[12px] font-semibold uppercase tracking-[0.16em] text-[#d4a04c]">
+   949→   949→   949→                  Documents Needed
+   950→   950→   950→                </h4>
+   951→   951→   951→                <ul className="mt-4 space-y-3">
+   952→   952→   952→                  {DOCUMENTS.map((d) => {
+   953→   953→   953→                    const Icon = d.icon;
+   954→   954→   954→                    return (
+   955→   955→   955→                      <li
+   956→   956→   956→                        key={d.label}
+   957→   957→   957→                        className="flex items-start gap-3"
+   958→   958→   958→                      >
+   959→   959→   959→                        <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[#d4a04c]/15 ring-1 ring-[#d4a04c]/25">
+   960→   960→   960→                          <Icon className="h-4 w-4 text-[#d4a04c]" />
+   961→   961→   961→                        </span>
+   962→   962→   962→                        <span className="font-sans text-[14px] leading-relaxed text-white/85">
+   963→   963→   963→                          {d.label}
+   964→   964→   964→                        </span>
+   965→   965→   965→                      </li>
+   966→   966→   966→                    );
+   967→   967→   967→                  })}
+   968→   968→   968→                </ul>
+   969→   969→   969→              </div>
+   970→   970→   970→            </div>
+   971→   971→   971→          </div>
+   972→   972→   972→        </div>
+   973→   973→   973→      </Section>
+   974→   974→   974→
+   975→   975→   975→      {/* ===== 9. FINAL CTA (navy glassmorphism) ===== */}
+   976→   976→   976→      <Section bg="navy" className="!py-20">
+   977→   977→   977→        <div className="reveal flex justify-center">
+   978→   978→   978→          <div className="w-full max-w-3xl rounded-2xl border border-white/15 bg-white/[0.06] p-8 text-center backdrop-blur-md sm:p-12">
+   979→   979→   979→            <h2 className="font-serif text-[26px] font-bold leading-tight text-white sm:text-[34px]">
+   980→   980→   980→              Still have <span style={{ color: "#d4a04c" }}>questions?</span>
+   981→   981→   981→            </h2>
+   982→   982→   982→            <p className="mx-auto mt-3 max-w-xl font-sans text-[15px] leading-relaxed text-white/75">
+   983→   983→   983→              Our admissions team is one message away. Whether it&apos;s about
+   984→   984→   984→              programs, fees, scholarships or documents — we&apos;ll guide you
+   985→   985→   985→              every step of the way.
+   986→   986→   986→            </p>
+   987→   987→   987→
+   988→   988→   988→            <div className="mt-7 flex flex-wrap items-center justify-center gap-4">
+   989→   989→   989→              <NavOutlineButton to="contact" light>
+   990→   990→   990→                Contact Admissions
+   991→   991→   991→              </NavOutlineButton>
+   992→   992→   992→              <a
+   993→   993→   993→                href={SOCIAL_LINKS.whatsapp}
+   994→   994→   994→                target="_blank"
+   995→   995→   995→                rel="noopener noreferrer"
+   996→   996→   996→                className="btn-gold inline-flex items-center gap-2 rounded-md bg-[#25D366] px-6 py-3 font-sans text-[14px] font-semibold text-white shadow-sm shadow-[#25D366]/30 transition-colors hover:bg-[#1ebe5d]"
+   997→   997→   997→              >
+   998→   998→   998→                <MessageCircle className="h-4 w-4" />
+   999→   999→   999→                WhatsApp Us
+  1000→  1000→  1000→              </a>
+  1001→  1001→  1001→            </div>
+  1002→  1002→  1002→
+  1003→  1003→  1003→            <p className="mt-6 font-sans text-[12px] text-white/55">
+  1004→  1004→  1004→              Shivaji College · University of Delhi · Admissions 2025-26
+  1005→  1005→  1005→            </p>
+  1006→  1006→  1006→          </div>
+  1007→  1007→  1007→        </div>
+  1008→  1008→  1008→      </Section>
+  1009→  1009→  1009→    </div>
+  1010→  1010→  1010→  );
+  1011→  1011→  1011→}
+  1012→  1012→  1012→

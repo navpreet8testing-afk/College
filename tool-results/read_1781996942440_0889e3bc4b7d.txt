@@ -1,0 +1,777 @@
+     1→"use client";
+     2→
+     3→import { useEffect, useState } from "react";
+     4→import {
+     5→  BookOpen,
+     6→  Scale,
+     7→  Scroll,
+     8→  Atom,
+     9→  FlaskConical,
+    10→  Calculator,
+    11→  Leaf,
+    12→  BarChart3,
+    13→  Laptop,
+    14→  GraduationCap,
+    15→  Microscope,
+    16→  Search,
+    17→  X,
+    18→  ArrowRight,
+    19→  Clock,
+    20→  CheckCircle2,
+    21→  FileCheck2,
+    22→  Upload,
+    23→  Users2,
+    24→  CreditCard,
+    25→  Briefcase,
+    26→  Sparkles,
+    27→  type LucideIcon,
+    28→} from "lucide-react";
+    29→import { useRouter } from "../router";
+    30→import { useScrollReveal } from "../hooks";
+    31→import {
+    32→  Section,
+    33→  SectionHeading,
+    34→  PageHero,
+    35→  NavGoldButton,
+    36→  NavOutlineButton,
+    37→  StatItem,
+    38→} from "../ui";
+    39→
+    40→const HERO_IMG = "https://sfile.chatglm.cn/images-ppt/2eb639974406.jpg";
+    41→const LAB_PARALLAX_IMG = "https://sfile.chatglm.cn/images-ppt/a05ae7e63413.jpg";
+    42→
+    43→/* ----------------------------- Course data ----------------------------- */
+    44→
+    45→interface Course {
+    46→  id: number;
+    47→  icon: LucideIcon;
+    48→  name: string;
+    49→  short: string;
+    50→  duration: string;
+    51→  eligibility: string;
+    52→  fee: string;
+    53→  seats: string;
+    54→  about: string;
+    55→  syllabus: string[];
+    56→  careers: string[];
+    57→}
+    58→
+    59→const COURSES: Course[] = [
+    60→  {
+    61→    id: 1,
+    62→    icon: BookOpen,
+    63→    name: "B.A. (Hons) English",
+    64→    short: "Literature, language and critical thinking.",
+    65→    duration: "3 Years",
+    66→    eligibility: "10+2 with 50%",
+    67→    fee: "₹18,000 / yr",
+    68→    seats: "60",
+    69→    about:
+    70→      "A rigorous immersion in literatures from across the world, literary theory and the craft of writing. Students sharpen analytical, interpretive and communication skills that open doors to media, academia, public policy and beyond. The program balances classical texts with contemporary voices and creative practice.",
+    71→    syllabus: [
+    72→      "British Literature — Chaucer to Romantic Age",
+    73→      "Indian Writing in English & Translation",
+    74→      "Literary Theory & Criticism",
+    75→      "American & Postcolonial Literature",
+    76→      "Creative Writing & Composition",
+    77→      "Linguistics & Phonetics",
+    78→    ],
+    79→    careers: [
+    80→      "Civil Services & UPSC",
+    81→      "Journalism & Publishing",
+    82→      "Content Strategy & Copywriting",
+    83→      "Higher Studies & Academia",
+    84→    ],
+    85→  },
+    86→  {
+    87→    id: 2,
+    88→    icon: Scale,
+    89→    name: "B.A. (Hons) Political Science",
+    90→    short: "Governance, polity and international relations.",
+    91→    duration: "3 Years",
+    92→    eligibility: "10+2 with 50%",
+    93→    fee: "₹17,500 / yr",
+    94→    seats: "55",
+    95→    about:
+    96→      "An in-depth study of political theory, Indian government, comparative politics and international relations. The program cultivates informed citizenship and analytical rigour through seminars, policy labs and fieldwork. Graduates are well-equipped for public service, law, diplomacy and research.",
+    97→    syllabus: [
+    98→      "Indian Government & Politics",
+    99→      "Political Theory & Thought",
+   100→      "Comparative Political Systems",
+   101→      "International Relations",
+   102→      "Public Administration",
+   103→      "Global Governance & Diplomacy",
+   104→    ],
+   105→    careers: [
+   106→      "Civil Services & Policy Analysis",
+   107→      "Law & Legal Research",
+   108→      "Journalism & Political Reporting",
+   109→      "NGOs & Think Tanks",
+   110→    ],
+   111→  },
+   112→  {
+   113→    id: 3,
+   114→    icon: Scroll,
+   115→    name: "B.A. (Hons) History",
+   116→    short: "Understanding the past to shape the future.",
+   117→    duration: "3 Years",
+   118→    eligibility: "10+2 with 50%",
+   119→    fee: "₹17,000 / yr",
+   120→    seats: "50",
+   121→    about:
+   122→      "A wide-ranging journey through ancient, medieval and modern histories of India and the world. Students learn to read primary sources, weigh evidence and construct nuanced narratives. The curriculum places special emphasis on cultural, social and economic history alongside archival methods.",
+   123→    syllabus: [
+   124→      "Ancient & Medieval India",
+   125→      "Modern India — 1757 to 1947",
+   126→      "History of the World — 1500+",
+   127→      "Historiography & Methods",
+   128→      "Art, Architecture & Culture",
+   129→      "Indian Freedom Struggle",
+   130→    ],
+   131→    careers: [
+   132→      "Archaeology & Museology",
+   133→      "Civil Services & Public Policy",
+   134→      "Heritage & Conservation",
+   135→      "Teaching & Research",
+   136→    ],
+   137→  },
+   138→  {
+   139→    id: 4,
+   140→    icon: Atom,
+   141→    name: "B.Sc. (Hons) Physics",
+   142→    short: "From quantum mechanics to astrophysics.",
+   143→    duration: "3 Years",
+   144→    eligibility: "10+2 Science, 55%",
+   145→    fee: "₹22,000 / yr",
+   146→    seats: "48",
+   147→    about:
+   148→      "A foundational and advanced study of classical and modern physics, from mechanics and electromagnetism to quantum theory and astrophysics. Students gain hands-on laboratory experience and computational modelling skills. The program is a launchpad for research, engineering and data science careers.",
+   149→    syllabus: [
+   150→      "Classical Mechanics & Relativity",
+   151→      "Quantum & Statistical Physics",
+   152→      "Electromagnetism & Optics",
+   153→      "Thermodynamics & Solid State",
+   154→      "Astrophysics & Cosmology",
+   155→      "Computational Physics Lab",
+   156→    ],
+   157→    careers: [
+   158→      "Research & Doctoral Studies",
+   159→      "Data Science & Analytics",
+   160→      "Engineering & Electronics",
+   161→      "Banking & Quant Finance",
+   162→    ],
+   163→  },
+   164→  {
+   165→    id: 5,
+   166→    icon: FlaskConical,
+   167→    name: "B.Sc. (Hons) Chemistry",
+   168→    short: "Organic, inorganic and physical chemistry.",
+   169→    duration: "3 Years",
+   170→    eligibility: "10+2 Science, 55%",
+   171→    fee: "₹23,000 / yr",
+   172→    seats: "48",
+   173→    about:
+   174→      "A comprehensive program spanning organic, inorganic and physical chemistry with strong laboratory training. Students explore molecular structure, reaction mechanisms and analytical techniques. Graduates thrive in pharmaceuticals, materials science, research and quality control.",
+   175→    syllabus: [
+   176→      "Organic Chemistry & Mechanisms",
+   177→      "Inorganic & Coordination Chemistry",
+   178→      "Physical & Analytical Chemistry",
+   179→      "Spectroscopy & Instrumentation",
+   180→      "Polymer & Material Chemistry",
+   181→      "Green & Environmental Chemistry",
+   182→    ],
+   183→    careers: [
+   184→      "Pharma & Drug Research",
+   185→      "Chemical & Petrochemical Industry",
+   186→      "Quality Control & Forensics",
+   187→      "Higher Studies & Academia",
+   188→    ],
+   189→  },
+   190→  {
+   191→    id: 6,
+   192→    icon: Calculator,
+   193→    name: "B.Sc. (Hons) Mathematics",
+   194→    short: "Pure & applied mathematics, statistics.",
+   195→    duration: "3 Years",
+   196→    eligibility: "10+2 Science, 55%",
+   197→    fee: "₹20,000 / yr",
+   198→    seats: "40",
+   199→    about:
+   200→      "A rigorous grounding in pure and applied mathematics, from calculus and algebra to topology, statistics and numerical methods. Students develop abstract reasoning and quantitative problem-solving abilities. The program opens pathways to research, actuarial science, finance and technology.",
+   201→    syllabus: [
+   202→      "Real & Complex Analysis",
+   203→      "Abstract & Linear Algebra",
+   204→      "Differential Equations & Modelling",
+   205→      "Probability & Statistics",
+   206→      "Numerical Methods & Programming",
+   207→      "Topology & Differential Geometry",
+   208→    ],
+   209→    careers: [
+   210→      "Data Science & Machine Learning",
+   211→      "Actuarial & Quant Finance",
+   212→      "Operations Research",
+   213→      "Teaching & Research",
+   214→    ],
+   215→  },
+   216→  {
+   217→    id: 7,
+   218→    icon: Leaf,
+   219→    name: "B.Sc. (Hons) Botany",
+   220→    short: "Plant sciences, ecology and biotechnology.",
+   221→    duration: "3 Years",
+   222→    eligibility: "10+2 Science, 55%",
+   223→    fee: "₹21,500 / yr",
+   224→    seats: "40",
+   225→    about:
+   226→      "An immersive study of plant biology — from molecular and cellular processes to ecology, taxonomy and biotechnology. Field trips and laboratory work bring the curriculum to life with living collections. Graduates are prepared for research, agriculture, environment and biotech sectors.",
+   227→    syllabus: [
+   228→      "Plant Anatomy & Morphology",
+   229→      "Plant Physiology & Biochemistry",
+   230→      "Taxonomy & Systematics",
+   231→      "Ecology & Environment",
+   232→      "Genetics & Plant Breeding",
+   233→      "Plant Biotechnology & Microbiology",
+   234→    ],
+   235→    careers: [
+   236→      "Agriculture & Forestry",
+   237→      "Environment & Conservation",
+   238→      "Pharma & Biotech Research",
+   239→      "Higher Studies & Academia",
+   240→    ],
+   241→  },
+   242→  {
+   243→    id: 8,
+   244→    icon: BarChart3,
+   245→    name: "B.Com (Hons)",
+   246→    short: "Accounting, finance and business management.",
+   247→    duration: "3 Years",
+   248→    eligibility: "10+2 with 50%",
+   249→    fee: "₹24,000 / yr",
+   250→    seats: "120",
+   251→    about:
+   252→      "A future-ready commerce program integrating accounting, finance, taxation and business management. The curriculum blends theory with case studies, internships and industry projects. Graduates pursue careers in accounting, banking, consulting and entrepreneurship.",
+   253→    syllabus: [
+   254→      "Financial & Corporate Accounting",
+   255→      "Business Statistics & Research",
+   256→      "Corporate & Taxation Law",
+   257→      "Financial Management & Markets",
+   258→      "Marketing & Human Resource",
+   259→      "Auditing & International Business",
+   260→    ],
+   261→    careers: [
+   262→      "Chartered Accountancy & Audit",
+   263→      "Banking & Financial Services",
+   264→      "Management Consulting",
+   265→      "Entrepreneurship & Startups",
+   266→    ],
+   267→  },
+   268→  {
+   269→    id: 9,
+   270→    icon: Laptop,
+   271→    name: "B.Sc. Computer Science",
+   272→    short: "CS, IT and data science with industry tie-ups.",
+   273→    duration: "3 Years",
+   274→    eligibility: "10+2 Science, 55%",
+   275→    fee: "₹28,000 / yr",
+   276→    seats: "60",
+   277→    about:
+   278→      "A hands-on program in computer science, software engineering and data science, designed with industry partners. Students build real systems across web, mobile and AI while mastering fundamentals. The curriculum is updated each year to track emerging technologies and hiring trends.",
+   279→    syllabus: [
+   280→      "Programming & Data Structures",
+   281→      "Operating Systems & Networks",
+   282→      "DBMS & Software Engineering",
+   283→      "Machine Learning & AI",
+   284→      "Web & Mobile Development",
+   285→      "Cloud Computing & Security",
+   286→    ],
+   287→    careers: [
+   288→      "Software Engineering",
+   289→      "Data Science & AI",
+   290→      "Product & UX Design",
+   291→      "Cloud & DevOps",
+   292→    ],
+   293→  },
+   294→  {
+   295→    id: 10,
+   296→    icon: GraduationCap,
+   297→    name: "M.A. (Postgraduate)",
+   298→    short: "Master's in Arts, English, History, Pol Science.",
+   299→    duration: "2 Years",
+   300→    eligibility: "Bachelor's degree, 50%",
+   301→    fee: "₹26,000 / yr",
+   302→    seats: "80",
+   303→    about:
+   304→      "Advanced master's programs across English, History and Political Science with a research-led curriculum. Students engage with seminars, dissertations and interdisciplinary electives. The program is ideal for aspiring academicians, researchers and thought leaders.",
+   305→    syllabus: [
+   306→      "Advanced Literary / Historical Theory",
+   307→      "Research Methodology",
+   308→      "Specialisation Electives",
+   309→      "Dissertation & Viva",
+   310→      "Interdisciplinary Seminars",
+   311→      "Fieldwork & Archival Study",
+   312→    ],
+   313→    careers: [
+   314→      "College & University Teaching",
+   315→      "Research Fellowships",
+   316→      "Civil Services & Policy",
+   317→      "Publishing & Media",
+   318→    ],
+   319→  },
+   320→  {
+   321→    id: 11,
+   322→    icon: Microscope,
+   323→    name: "M.Sc. (Postgraduate)",
+   324→    short: "Master's in Physics, Chemistry, Maths, Botany.",
+   325→    duration: "2 Years",
+   326→    eligibility: "B.Sc., 50%",
+   327→    fee: "₹30,000 / yr",
+   328→    seats: "90",
+   329→    about:
+   330→      "Specialised master's programs across Physics, Chemistry, Mathematics and Botany, anchored in laboratory and computational research. Students work closely with faculty mentors on funded projects and publications. The program is a stepping stone to doctoral research and R&D careers.",
+   331→    syllabus: [
+   332→      "Advanced Core & Specialisation Papers",
+   333→      "Research Methodology & Ethics",
+   334→      "Laboratory & Instrumentation",
+   335→      "Dissertation & Publications",
+   336→      "Seminars & Conferences",
+   337→      "Industry / Institute Internship",
+   338→    ],
+   339→    careers: [
+   340→      "Doctoral Research & Academia",
+   341→      "R&D in Industry",
+   342→      "Scientific Instrumentation",
+   343→      "Analytics & Modelling",
+   344→    ],
+   345→  },
+   346→  {
+   347→    id: 12,
+   348→    icon: Search,
+   349→    name: "Ph.D. (Research)",
+   350→    short: "Doctoral research across all disciplines.",
+   351→    duration: "3–5 Years",
+   352→    eligibility: "Master's degree, 55%",
+   353→    fee: "₹35,000 / yr",
+   354→    seats: "Open",
+   355→    about:
+   356→      "A doctoral program that nurtures original research across the sciences, humanities and commerce. Scholars work with experienced guides, access national and international collaborations, and publish in peer-reviewed journals. The program supports fellowships, travel grants and a vibrant research culture.",
+   357→    syllabus: [
+   358→      "Coursework & Comprehensive Exam",
+   359→      "Research Proposal & Synopsis",
+   360→      "Original Research & Fieldwork",
+   361→      "Peer-Reviewed Publications",
+   362→      "Thesis Submission & Viva",
+   363→      "Conference Presentations",
+   364→    ],
+   365→    careers: [
+   366→      "University Faculty",
+   367→      "Senior Research Scientist",
+   368→      "Policy & Think Tank Roles",
+   369→      "Entrepreneurship & Consulting",
+   370→    ],
+   371→  },
+   372→];
+   373→
+   374→/* Apply-procedure steps shared by every course modal */
+   375→const APPLY_STEPS = [
+   376→  { icon: FileCheck2, label: "Register online", sub: "Create your applicant portal" },
+   377→  { icon: Upload, label: "Upload documents", sub: "Marksheets, ID & photo" },
+   378→  { icon: Users2, label: "Merit & counselling", sub: "Seat allotment on merit" },
+   379→  { icon: CreditCard, label: "Pay & enroll", sub: "Confirm your admission" },
+   380→];
+   381→
+   382→const FACULTY = [
+   383→  { name: "Dr. Anita Desai", designation: "Professor & Head", department: "English", initials: "AD" },
+   384→  { name: "Dr. Vikram Rao", designation: "Professor", department: "Physics", initials: "VR" },
+   385→  { name: "Dr. Meera Nair", designation: "Associate Professor", department: "Commerce", initials: "MN" },
+   386→  { name: "Dr. Sanjay Gupta", designation: "Professor", department: "Computer Science", initials: "SG" },
+   387→];
+   388→
+   389→/* ------------------------------- Page ------------------------------- */
+   390→
+   391→export function AcademicsPage() {
+   392→  const { navigate } = useRouter();
+   393→  const revealRef = useScrollReveal<HTMLDivElement>();
+   394→  const [openCourseId, setOpenCourseId] = useState<number | null>(null);
+   395→
+   396→  // Force-reveal above-the-fold elements on mount (matches home.tsx pattern).
+   397→  useEffect(() => {
+   398→    const t = window.setTimeout(() => {
+   399→      document
+   400→        .querySelectorAll(".reveal:not(.is-visible), .reveal-stagger:not(.is-visible)")
+   401→        .forEach((el) => {
+   402→          const r = el.getBoundingClientRect();
+   403→          if (r.top < window.innerHeight) el.classList.add("is-visible");
+   404→        });
+   405→    }, 100);
+   406→    return () => window.clearTimeout(t);
+   407→  }, []);
+   408→
+   409→  // Lock body scroll when modal is open + Esc to close.
+   410→  useEffect(() => {
+   411→    if (openCourseId === null) return;
+   412→    const prev = document.body.style.overflow;
+   413→    document.body.style.overflow = "hidden";
+   414→    const onKey = (e: KeyboardEvent) => {
+   415→      if (e.key === "Escape") setOpenCourseId(null);
+   416→    };
+   417→    window.addEventListener("keydown", onKey);
+   418→    return () => {
+   419→      document.body.style.overflow = prev;
+   420→      window.removeEventListener("keydown", onKey);
+   421→    };
+   422→  }, [openCourseId]);
+   423→
+   424→  const openCourse = COURSES.find((c) => c.id === openCourseId) ?? null;
+   425→
+   426→  return (
+   427→    <div ref={revealRef} className="page-enter">
+   428→      {/* ===== 1. PAGE HERO ===== */}
+   429→      <PageHero
+   430→        eyebrow="Academics"
+   431→        title={
+   432→          <>
+   433→            Academic <span style={{ color: "#d4a04c" }}>Excellence</span>
+   434→          </>
+   435→        }
+   436→        description="Rigorous, future-ready programs across 6 streams — taught by 100+ PhD-qualified faculty in modern labs and smart classrooms."
+   437→        image={HERO_IMG}
+   438→      />
+   439→
+   440→      {/* ===== 2. GLASSMORPHISM STATS STRIP ===== */}
+   441→      <Section bg="navy" className="!py-14 sm:!py-16">
+   442→        <div className="reveal-stagger grid grid-cols-2 gap-6 rounded-2xl border border-white/15 bg-white/[0.06] p-8 backdrop-blur-md sm:grid-cols-4 sm:p-10">
+   443→          <StatItem value={25} suffix="+" label="Programs" light />
+   444→          <StatItem value={100} suffix="+" label="Faculty" light />
+   445→          <StatItem value={15} suffix=":1" label="Student Ratio" light />
+   446→          <StatItem value={100} suffix="%" label="Placements" light />
+   447→        </div>
+   448→      </Section>
+   449→
+   450→      {/* ===== 3. PROGRAMS SHOWCASE ===== */}
+   451→      <Section bg="white">
+   452→        <div className="reveal">
+   453→          <SectionHeading
+   454→            eyebrow="Programs"
+   455→            title={
+   456→              <>
+   457→                Explore Our <span style={{ color: "#d4a04c" }}>Programs</span>
+   458→              </>
+   459→            }
+   460→            description="Twelve undergraduate, postgraduate and doctoral programs — each designed to inspire curiosity, build expertise and unlock careers."
+   461→            align="center"
+   462→          />
+   463→        </div>
+   464→
+   465→        <div className="reveal-stagger mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+   466→          {COURSES.map((c) => (
+   467→            <article
+   468→              key={c.id}
+   469→              className="card-lift group flex flex-col rounded-2xl border border-white/40 bg-white/70 p-6 shadow-sm backdrop-blur-md transition-all duration-300 hover:shadow-xl"
+   470→            >
+   471→              <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#d4a04c] to-[#b8862f] shadow-sm">
+   472→                <c.icon className="h-6 w-6 text-white" />
+   473→              </div>
+   474→              <h3 className="mt-5 font-serif text-[19px] font-bold leading-snug text-[#1a2744]">
+   475→                {c.name}
+   476→              </h3>
+   477→              <p className="mt-2 flex-1 font-sans text-[14px] leading-relaxed text-[#5a6478]">
+   478→                {c.short}
+   479→              </p>
+   480→
+   481→              {/* Quick meta row */}
+   482→              <div className="mt-4 flex flex-wrap items-center gap-2">
+   483→                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1a2744]/10 bg-white/70 px-3 py-1 font-sans text-[12px] font-medium text-[#1a2744]">
+   484→                  <Clock className="h-3.5 w-3.5 text-[#d4a04c]" />
+   485→                  {c.duration}
+   486→                </span>
+   487→                <span className="inline-flex items-center gap-1.5 rounded-full border border-[#1a2744]/10 bg-white/70 px-3 py-1 font-sans text-[12px] font-medium text-[#1a2744]">
+   488→                  <Users2 className="h-3.5 w-3.5 text-[#d4a04c]" />
+   489→                  {c.seats} Seats
+   490→                </span>
+   491→              </div>
+   492→
+   493→              <button
+   494→                onClick={() => setOpenCourseId(c.id)}
+   495→                className="mt-5 inline-flex items-center justify-between gap-2 rounded-lg border border-[#1a2744]/15 bg-white/60 px-4 py-2.5 font-sans text-[13px] font-semibold text-[#1a2744] transition-all hover:border-[#d4a04c] hover:bg-[#d4a04c] hover:text-white"
+   496→              >
+   497→                View Details
+   498→                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+   499→              </button>
+   500→            </article>
+   501→          ))}
+   502→        </div>
+   503→      </Section>
+   504→
+   505→      {/* ===== 4. COURSE DETAIL MODAL ===== */}
+   506→      {openCourse && (
+   507→        <div
+   508→          className="fixed inset-0 z-[100] flex items-center justify-center p-4 animate-[fadeIn_.25s_ease]"
+   509→          onClick={() => setOpenCourseId(null)}
+   510→          role="dialog"
+   511→          aria-modal="true"
+   512→          aria-label={`${openCourse.name} details`}
+   513→        >
+   514→          {/* Backdrop */}
+   515→          <div className="absolute inset-0 bg-[#121c33]/70 backdrop-blur-md" />
+   516→
+   517→          {/* Panel */}
+   518→          <div
+   519→            onClick={(e) => e.stopPropagation()}
+   520→            className="relative max-h-[85vh] w-[calc(100%-2rem)] max-w-2xl overflow-y-auto rounded-2xl border border-white/40 bg-white/95 p-6 shadow-2xl backdrop-blur-2xl sm:p-8"
+   521→          >
+   522→            {/* Close button */}
+   523→            <button
+   524→              onClick={() => setOpenCourseId(null)}
+   525→              aria-label="Close details"
+   526→              className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full border border-[#1a2744]/10 bg-white/80 text-[#1a2744] transition-colors hover:bg-[#1a2744] hover:text-white"
+   527→            >
+   528→              <X className="h-4 w-4" />
+   529→            </button>
+   530→
+   531→            {/* Header */}
+   532→            <div className="flex items-start gap-4 pr-10">
+   533→              <div className="inline-flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#d4a04c] to-[#b8862f] shadow-sm">
+   534→                <openCourse.icon className="h-7 w-7 text-white" />
+   535→              </div>
+   536→              <div>
+   537→                <p className="font-sans text-[12px] font-semibold uppercase tracking-[0.18em] text-[#d4a04c]">
+   538→                  Program Details
+   539→                </p>
+   540→                <h3 className="mt-1 font-serif text-[26px] font-bold leading-tight text-[#1a2744] sm:text-[30px]">
+   541→                  {openCourse.name}
+   542→                </h3>
+   543→              </div>
+   544→            </div>
+   545→
+   546→            {/* Detail pills */}
+   547→            <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
+   548→              {[
+   549→                { icon: Clock, label: "Duration", value: openCourse.duration },
+   550→                { icon: FileCheck2, label: "Eligibility", value: openCourse.eligibility },
+   551→                { icon: CreditCard, label: "Annual Fee", value: openCourse.fee },
+   552→                { icon: Users2, label: "Seats", value: openCourse.seats },
+   553→              ].map((p) => (
+   554→                <div
+   555→                  key={p.label}
+   556→                  className="rounded-xl border border-[#1a2744]/10 bg-white/70 p-3 text-center backdrop-blur-md"
+   557→                >
+   558→                  <p.icon className="mx-auto h-5 w-5 text-[#d4a04c]" />
+   559→                  <div className="mt-1.5 font-sans text-[11px] font-medium uppercase tracking-wide text-[#5a6478]">
+   560→                    {p.label}
+   561→                  </div>
+   562→                  <div className="mt-0.5 font-serif text-[15px] font-bold text-[#1a2744]">
+   563→                    {p.value}
+   564→                  </div>
+   565→                </div>
+   566→              ))}
+   567→            </div>
+   568→
+   569→            {/* About */}
+   570→            <div className="mt-7">
+   571→              <h4 className="font-serif text-[18px] font-bold text-[#1a2744]">
+   572→                About the Program
+   573→              </h4>
+   574→              <p className="mt-2 font-sans text-[14px] leading-relaxed text-[#5a6478]">
+   575→                {openCourse.about}
+   576→              </p>
+   577→            </div>
+   578→
+   579→            {/* Syllabus highlights */}
+   580→            <div className="mt-7">
+   581→              <h4 className="font-serif text-[18px] font-bold text-[#1a2744]">
+   582→                Syllabus Highlights
+   583→              </h4>
+   584→              <ul className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+   585→                {openCourse.syllabus.map((s) => (
+   586→                  <li
+   587→                    key={s}
+   588→                    className="flex items-start gap-2 font-sans text-[14px] text-[#3a4358]"
+   589→                  >
+   590→                    <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-gradient-to-br from-[#d4a04c] to-[#b8862f]" />
+   591→                    {s}
+   592→                  </li>
+   593→                ))}
+   594→              </ul>
+   595→            </div>
+   596→
+   597→            {/* Career opportunities */}
+   598→            <div className="mt-7">
+   599→              <h4 className="font-serif text-[18px] font-bold text-[#1a2744]">
+   600→                Career Opportunities
+   601→              </h4>
+   602→              <div className="mt-3 flex flex-wrap gap-2">
+   603→                {openCourse.careers.map((career) => (
+   604→                  <span
+   605→                    key={career}
+   606→                    className="inline-flex items-center gap-1.5 rounded-full border border-[#1a2744]/10 bg-white/70 px-3 py-1.5 font-sans text-[13px] font-medium text-[#1a2744]"
+   607→                  >
+   608→                    <Briefcase className="h-3.5 w-3.5 text-[#d4a04c]" />
+   609→                    {career}
+   610→                  </span>
+   611→                ))}
+   612→              </div>
+   613→            </div>
+   614→
+   615→            {/* Apply procedure */}
+   616→            <div className="mt-7">
+   617→              <h4 className="font-serif text-[18px] font-bold text-[#1a2744]">
+   618→                Apply Procedure
+   619→              </h4>
+   620→              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+   621→                {APPLY_STEPS.map((step, i) => (
+   622→                  <div
+   623→                    key={step.label}
+   624→                    className="relative rounded-xl border border-[#1a2744]/10 bg-white/70 p-3 backdrop-blur-md"
+   625→                  >
+   626→                    <div className="flex items-center justify-between">
+   627→                      <step.icon className="h-5 w-5 text-[#d4a04c]" />
+   628→                      <span className="font-serif text-[18px] font-bold text-[#1a2744]/15">
+   629→                        {i + 1}
+   630→                      </span>
+   631→                    </div>
+   632→                    <div className="mt-1.5 font-sans text-[13px] font-bold text-[#1a2744]">
+   633→                      {step.label}
+   634→                    </div>
+   635→                    <div className="mt-0.5 font-sans text-[11px] text-[#5a6478]">
+   636→                      {step.sub}
+   637→                    </div>
+   638→                  </div>
+   639→                ))}
+   640→              </div>
+   641→            </div>
+   642→
+   643→            {/* CTAs */}
+   644→            <div className="mt-8 flex flex-col gap-3 border-t border-[#1a2744]/10 pt-6 sm:flex-row sm:items-center sm:justify-between">
+   645→              <div className="flex items-center gap-2 font-sans text-[13px] text-[#5a6478]">
+   646→                <CheckCircle2 className="h-4 w-4 text-[#d4a04c]" />
+   647→                Admissions open for 2025-26
+   648→              </div>
+   649→              <div className="flex flex-col gap-3 sm:flex-row">
+   650→                <button
+   651→                  onClick={() => {
+   652→                    setOpenCourseId(null);
+   653→                    navigate("admissions");
+   654→                  }}
+   655→                  className="btn-gold inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-br from-[#d4a04c] to-[#b8862f] px-6 py-3 font-sans text-[14px] font-semibold text-white"
+   656→                >
+   657→                  Apply Now
+   658→                  <ArrowRight className="h-4 w-4" />
+   659→                </button>
+   660→                <button
+   661→                  onClick={() => {
+   662→                    setOpenCourseId(null);
+   663→                    navigate("contact");
+   664→                  }}
+   665→                  className="btn-outline inline-flex items-center justify-center gap-2 rounded-md border border-[#1a2744] px-6 py-3 font-sans text-[14px] font-semibold text-[#1a2744] transition-colors hover:bg-[#1a2744] hover:text-white"
+   666→                >
+   667→                  Ask a Question
+   668→                </button>
+   669→              </div>
+   670→            </div>
+   671→          </div>
+   672→        </div>
+   673→      )}
+   674→
+   675→      {/* ===== 5. FACULTY HIGHLIGHTS ===== */}
+   676→      <Section bg="navy">
+   677→        <div className="reveal">
+   678→          <SectionHeading
+   679→            eyebrow="Faculty"
+   680→            title={
+   681→              <>
+   682→                Learn from the <span style={{ color: "#d4a04c" }}>Best</span>
+   683→              </>
+   684→            }
+   685→            description="Distinguished scholars, researchers and mentors who shape every classroom conversation."
+   686→            light
+   687→            align="center"
+   688→          />
+   689→        </div>
+   690→
+   691→        <div className="reveal-stagger mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+   692→          {FACULTY.map((f) => (
+   693→            <div
+   694→              key={f.name}
+   695→              className="card-lift rounded-2xl border border-white/10 bg-white/[0.06] p-6 text-center backdrop-blur-md"
+   696→            >
+   697→              <div className="mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-[#d4a04c] to-[#b8862f] shadow-lg ring-2 ring-white/10">
+   698→                <span className="font-serif text-[26px] font-bold text-white">
+   699→                  {f.initials}
+   700→                </span>
+   701→              </div>
+   702→              <h3 className="mt-5 font-serif text-[18px] font-bold text-white">
+   703→                {f.name}
+   704→              </h3>
+   705→              <p className="mt-1 font-sans text-[13px] font-semibold uppercase tracking-wide text-[#d4a04c]">
+   706→                {f.designation}
+   707→              </p>
+   708→              <p className="mt-1 font-sans text-[13px] text-white/60">
+   709→                Department of {f.department}
+   710→              </p>
+   711→            </div>
+   712→          ))}
+   713→        </div>
+   714→      </Section>
+   715→
+   716→      {/* ===== 6. LIFE IN THE LABS PARALLAX STRIP ===== */}
+   717→      <section
+   718→        className="relative w-full overflow-hidden bg-fixed py-28 sm:py-36"
+   719→        style={{
+   720→          backgroundImage: `url(${LAB_PARALLAX_IMG})`,
+   721→          backgroundSize: "cover",
+   722→          backgroundPosition: "center",
+   723→        }}
+   724→      >
+   725→        <div className="absolute inset-0 bg-[#121c33]/80" />
+   726→        <div className="relative mx-auto max-w-3xl px-4 text-center sm:px-6 lg:px-8">
+   727→          <div className="reveal inline-block rounded-2xl border border-white/15 bg-white/[0.06] p-8 backdrop-blur-md sm:p-12">
+   728→            <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#d4a04c] to-[#b8862f] shadow-sm">
+   729→              <FlaskConical className="h-6 w-6 text-white" />
+   730→            </div>
+   731→            <h2 className="mt-5 font-serif text-[30px] font-bold leading-tight text-white sm:text-[40px]">
+   732→              Where Theory Meets <span style={{ color: "#d4a04c" }}>Practice</span>
+   733→            </h2>
+   734→            <p className="mt-4 font-sans text-[15px] leading-relaxed text-white/85 sm:text-[16px]">
+   735→              State-of-the-art labs across every science department.
+   736→            </p>
+   737→            <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+   738→              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 font-sans text-[13px] font-medium text-white backdrop-blur-md">
+   739→                <Sparkles className="h-3.5 w-3.5 text-[#d4a04c]" />
+   740→                12+ Research Labs
+   741→              </span>
+   742→              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 font-sans text-[13px] font-medium text-white backdrop-blur-md">
+   743→                <Microscope className="h-3.5 w-3.5 text-[#d4a04c]" />
+   744→                Modern Instrumentation
+   745→              </span>
+   746→            </div>
+   747→          </div>
+   748→        </div>
+   749→      </section>
+   750→
+   751→      {/* ===== 7. CTA SECTION ===== */}
+   752→      <Section bg="navy" className="!py-16 sm:!py-20">
+   753→        <div className="reveal">
+   754→          <div className="mx-auto max-w-3xl rounded-2xl border border-white/15 bg-white/[0.06] p-8 text-center backdrop-blur-md sm:p-12">
+   755→            <div className="mx-auto inline-flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#d4a04c] to-[#b8862f] shadow-sm">
+   756→              <GraduationCap className="h-6 w-6 text-white" />
+   757→            </div>
+   758→            <h2 className="mt-5 font-serif text-[30px] font-bold leading-tight text-white sm:text-[38px]">
+   759→              Ready to <span style={{ color: "#d4a04c" }}>apply?</span>
+   760→            </h2>
+   761→            <p className="mx-auto mt-3 max-w-xl font-sans text-[15px] leading-relaxed text-white/80">
+   762→              Admissions for the 2025-26 session are now open. Take the first
+   763→              step toward a transformative education at Shivaji College.
+   764→            </p>
+   765→            <div className="mt-7 flex flex-wrap items-center justify-center gap-4">
+   766→              <NavGoldButton to="admissions">Apply Now</NavGoldButton>
+   767→              <NavOutlineButton to="contact" light>
+   768→                Talk to Us
+   769→              </NavOutlineButton>
+   770→            </div>
+   771→          </div>
+   772→        </div>
+   773→      </Section>
+   774→    </div>
+   775→  );
+   776→}
+   777→

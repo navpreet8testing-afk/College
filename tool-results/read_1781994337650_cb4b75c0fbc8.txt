@@ -1,0 +1,469 @@
+     1→# Shivaji College Website — Worklog
+     2→
+     3→---
+     4→Task ID: 1
+     5→Agent: main-orchestrator
+     6→Task: Build a 7-page college website replicating the reference design, with shared header/footer, full design system, and animations (preloader on every page, scroll reveal, count-up, page transitions, hover effects).
+     7→
+     8→Work Log:
+     9→- Analyzed reference image with VLM; extracted full design spec (navy #1a2744, gold #d4a04c, white bg, serif headings).
+    10→- Searched real web images for hero campus building, about/students, campus life gallery (6), news (4). URLs stored in img-*.json.
+    11→- Updated src/app/layout.tsx: Playfair Display (serif) + Inter (sans) fonts; metadata for Shivaji College.
+    12→- Rewrote src/app/globals.css: navy/gold color tokens, serif heading fonts, smooth scroll, `.reveal`/`.reveal-stagger` scroll animation, `.hero-animate` load animation, `.preloader-overlay` + logo fade, `.page-enter` transition, `.nav-link::after` underline animation, `.card-lift` hover (scale+shadow), `.btn-gold/.btn-navy/.btn-outline` transitions, `.gallery-item` zoom-on-hover, `.footer-link/.util-link` color transitions, custom scrollbar, reduced-motion support.
+    13→- Created src/components/site/router.tsx: hash-based RouterProvider with `page`, `navigate`, `isTransitioning` + NAV_ITEMS export.
+    14→- Created src/components/site/hooks.ts: `useScrollReveal` (IntersectionObserver adds .is-visible) + `useCountUp` (easeOutExpo count-up on enter viewport).
+    15→- Created src/components/site/brand.tsx: `CollegeLogo` (shield crest + SHIVAJI COLLEGE + ESTD. 1962), dark/light variants — used in header, footer, preloader identically.
+    16→- Created src/components/site/header.tsx: `SiteHeader` — navy utility bar (tagline + Alumni/Careers/News/Events/My Portal), white header (logo left, nav center with .nav-link underline animation, gold Apply Now button right), responsive mobile menu.
+    17→- Created src/components/site/footer.tsx: `SiteFooter` — dark navy 4-column (brand+desc+social, Quick Links, Resources, Contact Us), bottom copyright bar.
+    18→- Created src/components/site/preloader.tsx: `Preloader({triggerKey})` — full-screen navy overlay, CollegeLogo fade-in, spinner, fades out. Re-runs when triggerKey changes (every page nav).
+    19→- Created src/components/site/ui.tsx: shared building blocks — `Section` (white/navy/muted bg), `SectionHeading` (eyebrow+title+desc, left/center, light/dark), `PageHero` (image + navy overlay + animated hero text), `GoldButton`/`OutlineButton` (with .btn-gold/.btn-outline transitions), `NavGoldButton`/`NavOutlineButton` (router-aware), `StatItem` (count-up via useCountUp).
+    20→- Created src/components/site/pages/home.tsx: Homepage — hero (campus img, "Shaping Futures. Building Leaders." with gold accent, Explore Programs + Visit Campus buttons, .hero-animate staggered), About preview (4 count-up stats 60+/25+/15000+/100+, NAAC A+ badge, students img), Academics navy section (6 program cards Arts/Science/Commerce/CS/PG/Research with gold icons), Why Choose Us (7 feature cards + 1 CTA card = 8 tile grid), Campus Life gallery (4 zoom-on-hover), News & Events (3 cards), final navy CTA.
+    21→
+    22→Stage Summary:
+    23→- Design system fully established. Shared header/footer/preloader/brand/ui/hooks ready for reuse.
+    24→- Homepage complete and serves as the reference pattern for all other pages.
+    25→- Image URLs (all stable OSS-hosted):
+    26→  - Hero: https://sfile.chatglm.cn/images-ppt/08e74ab42b9f.jpg
+    27→  - Hero alt 1: https://sfile.chatglm.cn/images-ppt/e6404300f048.jpg
+    28→  - Hero alt 2: https://sfile.chatglm.cn/images-ppt/266d33a9f315.jpg
+    29→  - About/students: https://sfile.chatglm.cn/images-ppt/7df1c57f2624.jpg
+    30→  - Students alt 1: https://sfile.chatglm.cn/images-ppt/76660d081e96.jpeg
+    31→  - Students alt 2: https://sfile.chatglm.cn/images-ppt/d0551027275c.jpg
+    32→  - Gallery: d230d97ec036.jpg, 5f6cd2e84079.jpg, ca508794abb9.jpg, 13fb885b6841.jpg, e080bd4729da.png, 5cf1a100aaf3.jpg (prefix https://sfile.chatglm.cn/images-ppt/)
+    33→  - News: 04c3f229aad3.jpg, 0a1ae76ac812.jpg, b78c2d366609.jpg, 0339f6a8eb06.jpg
+    34→- Design tokens: navy=#1a2744, navy-deep=#121c33, gold=#d4a04c, gold-dark=#b8862f. Serif=Playfair, Sans=Inter.
+    35→- Shared component API (import from ../ui): Section({children,bg="white"|"navy"|"muted",className}), SectionHeading({eyebrow,title,description,align,light}), PageHero({eyebrow,title,description,image}), GoldButton/OutlineButton({children,onClick,light?}), NavGoldButton/NavOutlineButton({to,children,light?}), StatItem({value,suffix,label,light?}).
+    36→- Hooks (import from ../hooks): useScrollReveal<T>() returns ref — call it at top of each page component and attach to the page wrapper div. Pages must also import useRouter from ../router for navigate().
+    37→- Every page component must: be "use client", wrap content in a div with ref={revealRef} and className="page-enter", use .reveal / .reveal-stagger classes on sections to trigger scroll animations, end with the shared footer (added by parent, NOT in page file).
+    38→
+    39→---
+    40→Task ID: 9
+    41→Agent: full-stack-developer (About Us page)
+    42→Task: Build the About Us page for the Shivaji College website.
+    43→
+    44→Work Log:
+    45→- Read worklog.md, home.tsx, ui.tsx, router.tsx and hooks.ts to understand the design system and shared component API.
+    46→- Created src/components/site/pages/about.tsx as a "use client" component exporting `AboutPage`.
+    47→- Built PageHero with eyebrow "About Us", gold-accented title "Our Legacy & Mission", description and hero image (e6404300f048.jpg).
+    48→- Built History timeline section (white bg): vertical line using border-l-2 border-[#d4a04c]/30 with gold dot markers; 6 milestones (1962, 1971, 1985, 1998, 2010, 2020) each with gold serif year, navy serif title and gray sans description; each item has .reveal.
+    49→- Built Vision & Mission section (navy bg) with SectionHeading (light, center) and a 2-col reveal-stagger grid: Vision card (Compass icon, gold eyebrow, vision statement) and Mission card (Target icon, 5 mission bullets each prefixed with gold CheckCircle icon).
+    50→- Built Principal's Message section (white bg): 2-col layout with a 4/5 aspect portrait (76660d081e96.jpeg) on the left and the principal's welcome message on the right, followed by signature block (Dr. Rajesh Kumar Sharma / Principal, Shivaji College) and a NavGoldButton to="contact" labelled "Get in Touch".
+    51→- Built Accreditations grid (muted bg) with centered SectionHeading and a 3-col reveal-stagger grid of 6 cards using icons Award, Trophy, GraduationCap, Users, FlaskConical, Globe2 — each with large gold icon, navy serif title and gray sans description.
+    52→- Built Stats bar section (navy bg, !py-16) reusing StatItem with light prop: 60+ Years, 25+ Programs, 15000+ Alumni, 100+ Faculty; grid has .reveal.
+    53→- Followed home.tsx patterns exactly: useScrollReveal ref on wrapper div, page-enter class, useEffect forcing .is-visible on above-the-fold .reveal elements 100ms after mount, card-lift cards, btn-* button classes, navy/gold/white/gray palette only (no indigo/blue).
+    54→- Verified no lint errors introduced by about.tsx (remaining lint errors are pre-existing in preloader.tsx and router.tsx, outside this task's scope).
+    55→
+    56→Stage Summary:
+    57→- Artifact: src/components/site/pages/about.tsx — full About Us page with 6 sections (hero, history timeline, vision & mission, principal's message, accreditations grid, navy stats bar).
+    58→- Reuses all shared components (Section, SectionHeading, PageHero, NavGoldButton, StatItem) and follows the exact visual/animation patterns of home.tsx.
+    59→- All images use the stable OSS URLs from the worklog (e6404300f048.jpg hero, 76660d081e96.jpeg principal portrait).
+    60→- Color palette strictly navy (#1a2744 / #121c33), gold (#d4a04c / #b8862f), white and gray (#5a6478) — no indigo/blue.
+    61→
+    62→---
+    63→Task ID: 11
+    64→Agent: full-stack-developer (Admissions page)
+    65→Task: Build the Admissions page for the Shivaji College website.
+    66→
+    67→Work Log:
+    68→- Read worklog.md for the full design system, shared component API, design tokens, and image URLs.
+    69→- Read home.tsx to match the exact visual pattern (Section/SectionHeading/PageHero usage, reveal/reveal-stagger classes, hero-animate, card-lift, navy/gold/white/muted bg cycle, btn-gold/btn-outline transitions, force-is-visible useEffect on mount).
+    70→- Read ui.tsx, router.tsx, hooks.ts to confirm component signatures (NavGoldButton/NavOutlineButton({to,children,light?}), useScrollReveal<T>() returning a ref, PageKey includes "admissions" and "contact").
+    71→- Created src/components/site/pages/admissions.tsx with "use client" + export function AdmissionsPage().
+    72→- Top of component: const revealRef = useScrollReveal<HTMLDivElement>(); plus the copied useEffect from home.tsx that force-adds .is-visible to above-the-fold reveals 100ms after mount.
+    73→- Wrapped all content in <div ref={revealRef} className="page-enter">.
+    74→- Section 1 — PageHero with eyebrow "Admissions 2025-26", title with gold-span "Shivaji College", description, and the d0551027275c.jpg hero image.
+    75→- Section 2 — How to Apply (white bg): centered SectionHeading + 4-column reveal-stagger grid of numbered cards. Each card has a large gold circle (bg-[#d4a04c]/10 + ring-2 ring-[#d4a04c]/30) holding a serif-extrabold gold step number, navy serif-bold title, gray sans description.
+    76→- Section 3 — Eligibility (muted bg): two-column grid — left SectionHeading "Are you eligible?", right white card containing an unordered list of 6 points, each prefixed with a gold CheckCircle2 lucide icon and navy sans text.
+    77→- Section 4 — Important Dates (white bg): SectionHeading + a plain <table> (not shadcn) with Tailwind classes. Navy header row (bg-[#1a2744]) with white uppercase sans-semibold headers; body rows alternate white / bg-[#f7f5f0]; event column in navy serif-bold, dates in gray sans. 6 rows covering Online Registration Opens through Semester Commences.
+    78→- Section 5 — Fee Structure (muted bg): centered SectionHeading + reveal-stagger grid (sm:grid-cols-2 lg:grid-cols-3) of 6 program fee cards. Each card: navy serif-bold program name, gray uppercase "Annual Fee" label, big gold serif-extrabold price with gold-dark /yr suffix, a thin divider (h-px bg-[#1a2744]/10), then the small detail line "Inclusive of all academic charges. Hostel & exam fees separate."
+    79→- Section 6 — Apply Now CTA (navy bg): centered. Big white serif title "Ready to Apply Now?" with gold span, white/75 subtitle, then a centered button row — NavGoldButton to="admissions" "Apply Now" and NavOutlineButton to="contact" light "Have Questions?". Below, a 3-column border-top row of contact mini-items each with a gold lucide icon (Phone, Mail, Clock) and white/85 label.
+    80→- Used only navy / gold / white / gray colors. Used lucide-react icons (CheckCircle2, Phone, Mail, Clock) — no indigo/blue. No SiteHeader/SiteFooter included (parent adds them).
+    81→- Ran `bun run lint` — admissions.tsx produced zero lint errors. (The 2 remaining lint errors are pre-existing in preloader.tsx and router.tsx, which are out of scope for this task.)
+    82→
+    83→Stage Summary:
+    84→- Admissions page delivered at src/components/site/pages/admissions.tsx, fully matching the home.tsx visual pattern and design tokens.
+    85→- Six content sections: hero, 4-step process, eligibility checklist, important-dates table, 6-card fee structure, navy apply-now CTA with contact mini-items.
+    86→- All shared components reused (PageHero, Section, SectionHeading, NavGoldButton, NavOutlineButton), scroll-reveal hooks wired, above-the-fold force-is-visible effect copied verbatim from home.tsx.
+    87→- Page is router-ready: exports AdmissionsPage(), uses only navy/gold/white/gray palette, no indigo/blue, lucide-react icons only.
+    88→
+    89→---
+    90→Task ID: 10
+    91→Agent: full-stack-developer (Academics page)
+    92→Task: Build the Academics page for the Shivaji College website.
+    93→
+    94→Work Log:
+    95→- Read worklog.md (design system, shared component API), home.tsx (reference pattern), ui.tsx, router.tsx, hooks.ts.
+    96→- Created src/components/site/pages/academics.tsx as a single "use client" page component `AcademicsPage`.
+    97→- Wrapped all content in `<div ref={revealRef} className="page-enter">` using `useScrollReveal<HTMLDivElement>()`, and copied the home.tsx useEffect that force-adds `.is-visible` to above-the-fold `.reveal` / `.reveal-stagger` elements 100ms after mount.
+    98→- Section 1 — Hero: `PageHero` with eyebrow "Academics", title `Academic <gold>Excellence</gold>`, full description, and image https://sfile.chatglm.cn/images-ppt/266d33a9f315.jpg.
+    99→- Section 2 — Overview stats strip (muted bg, shorter padding `!py-14`): centered `SectionHeading` eyebrow "Overview" + title `Programs that <gold>Inspire</gold>`, then a 3-col `reveal-stagger` grid of `StatItem`s: 25+ Programs, 100+ Faculty, 15:1 Student-Teacher Ratio (value=15, suffix=":1" so count-up animates the ratio).
+   100→- Section 3 — Programs detailed cards (white bg): `SectionHeading` eyebrow "Departments" + title `Explore Our <gold>Programs</gold>` + description, then sm:grid-cols-2 of 6 cards. Each card: white rounded-xl shadow-sm ring + `.card-lift`; top row = gold icon in navy-tinted box (bg-[#1a2744]/5) + program name (navy serif bold); description paragraph (gray sans); bordered detail block with 3 divided rows (Eligibility / Duration / Seats) using small uppercase gray labels and navy bold values; ends with gold "Learn More" link (ArrowUpRight). All 6 programs use the exact eligibility/duration/seats figures provided.
+   101→- Section 4 — Faculty highlights (navy bg): `SectionHeading` eyebrow "Faculty" + title `Learn from the <gold>Best</gold>` + description, light. sm:grid-cols-2 lg:grid-cols-4 of 4 cards on `bg-white/[0.04]` with backdrop-blur. Each card: circular avatar (h-20 w-20 rounded-full bg-[#d4a04c]/15) with gold serif initials (AD/VR/MN/SG), name (white serif bold), designation (gold sans small uppercase), department (white/60 sans small).
+   102→- Section 5 — CTA (navy bg, `!py-16`): centered `reveal` group. Title `Ready to <gold>apply?</gold>` (white serif bold), subtitle "Admissions for 2025-26 are now open.", two buttons — `NavGoldButton to="admissions"` "Apply Now" and `NavOutlineButton to="contact" light` "Talk to Us".
+   103→- Used only lucide-react icons (BookOpen, FlaskConical, BarChart3, Laptop, GraduationCap, Search, ArrowUpRight). Confined palette to navy (#1a2744), gold (#d4a04c / #b8862f), white, and gray — no indigo/blue.
+   104→- Did NOT include SiteHeader/SiteFooter (parent adds them). Did NOT modify any other file.
+   105→
+   106→Stage Summary:
+   107→- academics.tsx is complete, follows the home.tsx visual pattern exactly, and reuses all shared ui.tsx components (Section, SectionHeading, PageHero, NavGoldButton, NavOutlineButton, StatItem) plus useScrollReveal + useRouter.
+   108→- Page covers all 5 required sections: hero, overview stats strip, 6 detailed program cards, 4 faculty highlight cards, and final CTA.
+   109→- Lint: academics.tsx itself produces no errors. (2 pre-existing errors remain in preloader.tsx/router.tsx, which are out of scope for this task and were not touched.)
+   110→- Dev server compiles cleanly on the new file.
+   111→
+   112→---
+   113→Task ID: 12
+   114→Agent: full-stack-developer (Campus Life page)
+   115→Task: Build the Campus Life page for the Shivaji College website.
+   116→
+   117→Work Log:
+   118→- Read worklog.md (design system + shared component API), home.tsx (reference pattern incl. the useEffect that force-adds .is-visible above the fold), ui.tsx, router.tsx and hooks.ts.
+   119→- Created /home/z/my-project/src/components/site/pages/campus-life.tsx — "use client", exports CampusLifePage(), wraps content in <div ref={revealRef} className="page-enter">, copies the home page's force-visible useEffect verbatim.
+   120→- Sections built per spec: (1) PageHero with eyebrow "Campus Life", title "Learn. Grow. <gold>Belong.</gold>", the specified description and hero image 5f6cd2e84079.jpg; (2) Gallery on white bg — SectionHeading + 6 .gallery-item tiles (grid-cols-2 lg:grid-cols-3, first tile col-span-2 lg:col-span-2 for masonry interest) each with aspect-[4/3] image, navy gradient overlay, uppercase white sans label; (3) Clubs & Societies on muted bg — 6 .card-lift white cards (sm:grid-cols-2 lg:grid-cols-3) each with gold icon in navy-tinted box, navy serif name, gray one-liner and a gold/15 "Members: N+" pill with Users icon; (4) Facilities on white bg — 4 .card-lift cards (sm:grid-cols-2 lg:grid-cols-4) with larger gold icon, navy serif title, gray 2-line blurb; (5) Final CTA on navy bg — centered "Experience it yourself.", subtitle, NavOutlineButton(contact,light) "Schedule a Visit" + NavGoldButton(admissions) "Apply Now".
+   121→- Used lucide-react icons Music, Drama, MessageSquare, Cpu, Trophy, Leaf, Library, Dumbbell, Building, Mic, Users. Palette strictly navy/gold/white/gray/muted-cream — no indigo or blue.
+   122→- Wrote work record to /agent-ctx/12-full-stack-developer.md.
+   123→- Ran `bun run lint`: the only two errors are pre-existing ones in preloader.tsx and router.tsx (setState-in-effect warnings) — files outside this task's scope. campus-life.tsx produced zero lint errors. dev.log shows the dev server compiling cleanly with 200 responses.
+   124→
+   125→Stage Summary:
+   126→- Campus Life page complete and visually consistent with the home page (same wrapper, reveal/force-visible effect, Section/SectionHeading/PageHero/Nav*Button usage, .card-lift / .gallery-item patterns).
+   127→- All 5 required sections implemented with the specified copy, icons, member counts, facility blurbs, image URLs and CTAs.
+   128→- Responsive (mobile-first, scales through sm: and lg:), accessible touch targets, no restricted colors.
+   129→- Lint-clean new file; route renders without compile errors on the dev server.
+   130→
+   131→---
+   132→Task ID: 14
+   133→Agent: full-stack-developer (Contact Us page)
+   134→Task: Build the Contact Us page for the Shivaji College website.
+   135→
+   136→Work Log:
+   137→- Read worklog.md, home.tsx, ui.tsx, router.tsx, hooks.ts to lock in the design system, shared component API, and page-assembly pattern.
+   138→- Created src/components/site/pages/contact.tsx as a single "use client" file exporting ContactPage(). Verified lucide-react 0.525 still ships Facebook/Twitter/Instagram/Linkedin/Youtube brand icons.
+   139→- Hero: PageHero with eyebrow "Contact Us", gold-accented "Get in Touch" title, 24-hour-response description, image 266d33a9f315.jpg.
+   140→- Form + details section (white bg, lg:grid-cols-2 gap-10): LEFT a white rounded-xl shadow-sm card form (name/email/subject/message, all required) with the shared INPUT_CLASS (rounded-md, gold focus ring), navy semibold labels, and a custom gold submit button (.btn-gold class + Send icon). RIGHT a navy card (#1a2744) with 4 contact rows (MapPin/Phone/Mail/Clock — gold icon in white/10 circle, gold uppercase label, white value) plus a "Follow Us" row of 5 social icon circles (white/10 → gold on hover).
+   141→- Functional client-side form: useState for the 4 fields + submitted flag. handleSubmit preventDefaults, flips submitted true, clears the fields. On submit a green-tinted box (border-green-200 bg-green-50) with a green CheckCircle2 icon shows "Thank you! Your message has been received. We'll get back to you within 24 hours." inline above the form. No API calls.
+   142→- Map + departments (muted bg): SectionHeading "Find Us / Visit Our Campus", then reveal-stagger 2-col grid. LEFT an aspect-[16/10] rounded-xl shadow-sm div embedding a real OpenStreetMap iframe (h-full w-full border-0, lazy). RIGHT a 2x2 grid of white card-lift mini-cards (Admissions / Academic / Research Cell / Hostel) each with navy serif name + Phone-icon and Mail-icon lines in gray sans.
+   143→- Final CTA (navy bg, centered): serif "Still have questions?" (gold accent), subtitle, then NavGoldButton to="admissions" "Apply Now" and NavOutlineButton to="academics" light "Explore Programs".
+   144→- Followed all assembly rules: page-enter wrapper with revealRef, .reveal on each major block, .reveal-stagger on the map+departments grid, copied the 100ms force-is-visible useEffect from home.tsx, no SiteHeader/SiteFooter, only navy/gold/white/gray + green for the success state.
+   145→- Ran `bun run lint` on the file alone: 0 errors. (The 2 repo-wide lint errors live in preloader.tsx and router.tsx, which are out of scope for this task.)
+   146→
+   147→Stage Summary:
+   148→- Contact Us page complete at src/components/site/pages/contact.tsx, matching the home.tsx visual pattern exactly.
+   149→- Exports ContactPage() ready to be wired into the router by the orchestrator (PageKey "contact" already exists in router.tsx).
+   150→- Functional client-only contact form with inline green success confirmation, real OpenStreetMap embed, 4 department mini-cards, navy contact-details card with social row, and a navy final CTA — all responsive, animated, and accessible (labels linked via htmlFor, aria-labels on social links).
+   151→
+   152→---
+   153→Task ID: 13
+   154→Agent: full-stack-developer (Research page)
+   155→Task: Build the Research page for the Shivaji College website.
+   156→
+   157→Work Log:
+   158→- Read worklog.md for the full design system (navy/gold tokens, Playfair/Inter fonts, shared component API).
+   159→- Studied home.tsx as the reference pattern: `"use client"`, `useScrollReveal` ref on the page wrapper, `page-enter` class, the mount-time `useEffect` that force-adds `.is-visible` to above-the-fold `.reveal` elements, and the consistent use of `Section`/`SectionHeading`/`NavGoldButton`/`NavOutlineButton`/`StatItem` building blocks.
+   160→- Confirmed shared component signatures from ui.tsx (`Section`, `SectionHeading`, `PageHero`, `NavGoldButton`, `NavOutlineButton`, `StatItem`), router PageKey union from router.tsx, and `useScrollReveal` API from hooks.ts.
+   161→- Verified all required lucide-react icons exist (Atom, Dna, BrainCircuit, Users, BookOpen, Leaf, FileText, plus ArrowRight/Calendar/IndianRupee accents).
+   162→- Wrote `/home/z/my-project/src/components/site/pages/research.tsx` with `export function ResearchPage()` containing all 7 sections:
+   163→  1. PageHero — eyebrow "Research & Innovation", title `Driving <span gold>Innovation</span>`, description, hero image 0339f6a8eb06.jpg.
+   164→  2. Muted stats strip — SectionHeading (Impact / Research that Matters) centered + 4-column StatItem row (25+ Research Centers, 400+ Publications (2024), 60+ Ongoing Projects, 5.2 Cr+ Funding).
+   165→  3. White research-areas grid — SectionHeading centered + 6 `.card-lift` cards (Atom/Sciences, Dna/Life Sciences, BrainCircuit/CS & AI, Users/Social Sciences, BookOpen/Humanities, Leaf/Sustainability) each with gold icon in navy-tinted box, navy serif title, gray description, and gold "Active projects: N" footer.
+   166→  4. Navy publications section — SectionHeading (light) + 3-col list of 6 publications, each with gold FileText icon, white serif title, gold journal, white/60 year.
+   167→  5. Muted ongoing-projects grid — SectionHeading centered + 4 `.card-lift` cards (DST/UGC/DBT/ICSSR), each with gold "Funded by X" badge, navy serif title, PI + department, gold funding amount, duration row.
+   168→  6. White collaborators grid — SectionHeading centered + 6 partner tiles (`h-24 rounded-xl border border-gray-200`) with navy serif partner names (IIT Delhi, JNU, AIIMS, CSIR, TIFR, IBM Research).
+   169→  7. Navy final CTA — centered title `Have a research <span gold>idea?</span>`, subtitle, NavOutlineButton(light, to=contact) "Contact Research Office" + NavGoldButton(to=admissions) "Apply for Ph.D.".
+   170→- Applied `.reveal` to every major section block and `.reveal-stagger` to every card grid so the IntersectionObserver triggers scroll animations.
+   171→- Copied the home.tsx `useEffect` verbatim (100ms timeout, force-add `.is-visible` to in-viewport `.reveal`/`.reveal-stagger`) so above-the-fold sections animate in on mount.
+   172→- Used only navy (#1a2744), gold (#d4a04c), white, gray colors — no indigo/blue. All icons from lucide-react.
+   173→- Ran `bun run lint`: the only 2 errors are pre-existing in preloader.tsx and router.tsx (files I must not touch); research.tsx has zero lint errors. Dev log shows clean compilation.
+   174→
+   175→Stage Summary:
+   176→- Research page complete at `/home/z/my-project/src/components/site/pages/research.tsx`, exporting `ResearchPage`.
+   177→- Visual style matches home.tsx exactly: same Section/SectionHeading/PageHero/card patterns, same navy/gold/white palette, same `.card-lift` hover, same `.reveal`/`.reveal-stagger` animation hooks, same mount-time force-reveal effect.
+   178→- 7 sections delivered per spec: hero, impact stats, research areas (6 cards), publications (6 items on navy), ongoing projects (4 cards), collaborators (6 partner tiles), final navy CTA.
+   179→- Ready to be mounted by the parent router (which supplies SiteHeader + SiteFooter); no header/footer/global CSS touched.
+   180→
+   181→---
+   182→Task ID: 2-phase2-infra
+   183→Agent: main-orchestrator
+   184→Task: Phase 2 infrastructure — 10 new pages, mega menu, Gemini chatbot, WhatsApp, email-connected forms, working social links, Indian imagery.
+   185→
+   186→Work Log:
+   187→- Added ContactSubmission model to prisma/schema.prisma (type, name, email, phone, subject, message, meta JSON, createdAt). Ran `bun run db:push`.
+   188→- Created /api/contact route: validates input, persists to DB, best-effort email forward to CONTACT_EMAIL=navpreet8testing@gmail.com. Handles all form types (contact, alumni, careers, grievance, newsletter, portal).
+   189→- Created /api/chat route: proxies to Google Gemini 2.0 Flash with a "Shivu" Shivaji College assistant system prompt. GEMINI_API_KEY stored in .env. Takes {message, history}, returns {reply}.
+   190→- Added .env with GEMINI_API_KEY, CONTACT_EMAIL=navpreet8testing@gmail.com, DATABASE_URL.
+   191→- Updated router.tsx: added 10 new PageKeys (alumni, careers, news, events, portal, student-portal, faculty-portal, library, downloads, grievance). Added MEGA_MENU structure grouping sub-pages under each top-level nav item. Added SOCIAL_LINKS (real FB/IG/Twitter/YT/WhatsApp URLs), COLLEGE_WHATSAPP=911125692767, COLLEGE_PHONE, COLLEGE_EMAIL constants.
+   192→- Rebuilt header.tsx with MEGA MENU: desktop hover dropdown panels (grouped links with descriptions), mobile accordion, working social icons in utility bar, WhatsApp quick-action button next to Apply Now. Utility bar links now navigate (Alumni/Careers/News/Events/My Portal).
+   193→- Updated footer.tsx: Quick Links + Resources (Student/Faculty Portal, Library, Downloads, Grievance) all navigate via router. Social icons use real URLs (open in new tab). Added WhatsApp CTA button. Phone/email are tel:/mailto: links.
+   194→- Built chatbot.tsx — floating gold button bottom-right, opens chat panel, calls /api/chat, shows typing indicator, quick-prompt chips, conversation history, "Shivu" branding with online status dot.
+   195→- Built whatsapp-button.tsx — floating green button bottom-left with ping animation, auto-open hint popover after 6s, links to wa.me with prefilled message.
+   196→- Built site-form.tsx — reusable SiteForm component (fields config, posts to /api/contact, success/error states, loading spinner, "sent to navpreet8testing@gmail.com" note). NewsletterChip for email-only signups. FormCard wrapper.
+   197→- Updated contact.tsx to use SiteForm (posts to API). Updated SOCIALS array with real hrefs incl. WhatsApp.
+   198→- Updated page.tsx to render Chatbot + WhatsAppButton on every page and lazy-import all 17 page components.
+   199→- Searched 48 genuine Indian images (campus, students, cultural, sports, grad, library, tech, research) — URLs available for subagents.
+   200→
+   201→Stage Summary:
+   202→- All infrastructure ready. 10 new page files need to be created by subagents (alumni, careers, news, events, portal, student-portal, faculty-portal, library, downloads, grievance).
+   203→- Shared component API additions:
+   204→  - `SiteForm` (from "../site-form"): `<SiteForm type="contact" fields={[{name,label,type?,required?,placeholder?,options?,rows?}]} submitLabel? successMessage? buttonAlign? meta? />` — handles POST to /api/contact automatically.
+   205→  - `NewsletterChip` (from "../site-form"): email-only signup.
+   206→  - `FormCard({title,subtitle,children})` (from "../site-form"): labeled form wrapper.
+   207→  - Constants from "../router": SOCIAL_LINKS (facebook, instagram, twitter, youtube, whatsapp), COLLEGE_WHATSAPP, COLLEGE_PHONE, COLLEGE_EMAIL.
+   208→  - `MEGA_MENU` and new PageKeys exported from "../router".
+   209→- Indian image URLs (prefix https://sfile.chatglm.cn/images-ppt/):
+   210→  campus: 880a0bd2dabb.jpg, 1a695321c5c0.jpeg, a68f3992ac0e.jpg, 84dc1ad3d787.jpg, 69fc9644f1cf.jpg, 4a09de1aed8d.jpg
+   211→  students: 87641eba9a3c.jpg, eaf4bc37a875.jpg, 27da05f10395.jpg, 3006c4078c77.jpg, 98a38617d29b.jpg, 1efcc6643781.jpg
+   212→  cultural: 6fb3150be1c0.jpg, 669534ac63fd.jpg, af882f27447d.jpg, 94a9271eead8.jpg, 262ec3863ebd.jpg, 0dbf7b79deb6.jpg
+   213→  sports: be7526cd5b99.jpg, 4cd898d220f5.jpg, cbe0cde5f970.jpg, bca860f869e2.jpg, 1002e19a86a3.jpg, 620f581d073c.jpg
+   214→  grad: 492ca6a761d6.jpg, c92d276efac6.jpg, 10df1a0cbaef.jpg, e9676797754f.jpg, 89e4843c9c5b.jpg, d8ce374fafa3.jpg
+   215→  library: c89dfee1ab74.png, f8fa351e7b80.jpg, e8c509f6af90.jpg, 6dda3c96cd6d.png, c4f4bdd16658.jpg, 9383c3cf66ed.jpg
+   216→  tech: afaf375d7649.jpg, 0565ef02136a.png, 824625bd6028.png, 340addfed4c5.jpg, 7b63e24427f5.jpg, a7d572eee2f1.jpg
+   217→  research: 84bcb5cbdc3e.jpg, 7d2ab04bf467.jpg, 9106a2c43162.jpg, 32d2252f2699.jpg, b76f7a019c92.png, d54fdf53231e.jpg
+   218→- Design tokens unchanged: navy #1a2744, gold #d4a04c, navy-deep #121c33.
+   219→- Each new page MUST follow the home.tsx pattern: "use client", useScrollReveal ref + page-enter wrapper, .reveal/.reveal-stagger classes, copy the force-is-visible useEffect, no header/footer (parent adds them), only navy/gold/white/gray, lucide-react icons.
+   220→
+   221→---
+   222→Task ID: NEWS
+   223→Agent: full-stack-developer (News page)
+   224→Task: Build the News page.
+   225→
+   226→Work Log:
+   227→- Read worklog.md for design tokens (#1a2744 / #121c33 / #d4a04c, Playfair/Inter, .card-lift, .gallery-item), shared component API, and Indian image URL pools (tech/cultural/sports/grad/library/research/students/campus).
+   228→- Read home.tsx for the reference pattern (useScrollReveal ref + page-enter wrapper, force-is-visible useEffect, .reveal/.reveal-stagger, Section/SectionHeading usage, news card markup).
+   229→- Read ui.tsx (Section, SectionHeading, PageHero, NavOutlineButton, StatItem), router.tsx (useRouter, PageKey), hooks.ts (useScrollReveal), site-form.tsx (NewsletterChip).
+   230→- Created src/components/site/pages/news.tsx — "use client" component `NewsPage()` with 8 sections:
+   231→  1. PageHero — eyebrow "News & Media", gold-highlighted title, description, tech hero image (0565ef02136a.png).
+   232→  2. Featured story — white card, 2-col layout (image LEFT 340addfed4c5.jpg, content RIGHT with gold "Featured" pill, date, navy serif headline, 3-sentence excerpt, gold "Read Full Story" link).
+   233→  3. Category filter bar — muted thin section with 7 pill buttons (All, Achievements, Academics, Campus, Research, Sports, Admissions); "All" default gold; implemented functional useState filtering of the news grid.
+   234→  4. News grid — white section, SectionHeading eyebrow "Latest News" / gold "Recent" title, sm:2 / lg:3 columns, 9 cards (cycled Indian images per category), gold category tag overlay, date row with Calendar icon, navy serif headline, 1-line excerpt, "Read More" gold link.
+   235→  5. Press releases — navy section, SectionHeading eyebrow "Press" / gold "Press Releases" title, vertical list of 4 items each with gold FileText icon, white serif title, gold sans date, white/70 summary.
+   236→  6. Media coverage — muted section, centered heading "As Seen in the Media", grid-cols-2/3/6 of 6 logo placeholders (h-20, border, navy serif semibold text): Times of India, The Hindu, Hindustan Times, NDTV, India Today, ANI.
+   237→  7. Newsletter CTA — navy centered section with Newspaper icon, white serif title "Never miss a headline", subtitle, NewsletterChip in max-w-md.
+   238→  8. Final CTA — white section, "Have a story to share?" heading + NavOutlineButton to="contact" "Contact Media Cell".
+   239→- Verified with `bun run lint` — clean pass, no errors.
+   240→- Used only navy/gold/white/gray palette; no indigo/blue; lucide-react icons (Calendar, ArrowRight, ArrowUpRight, FileText, Sparkles, Newspaper); reveal-ref + page-enter wrapper + force-is-visible useEffect copied from home pattern; no header/footer.
+   241→
+   242→Stage Summary:
+   243→- News page complete at src/components/site/pages/news.tsx (~370 lines, single file, no other files touched).
+   244→- Page is rich & long: hero + featured + functional category filter + 9-card grid + 4 press releases + 6 media logos + newsletter CTA + final CTA.
+   245→- Reuses all shared primitives (Section, SectionHeading, PageHero, NavOutlineButton, NewsletterChip, useScrollReveal, useRouter) per the design system.
+   246→- Category filter is interactive (useState) — selecting a category filters the news grid live; "All" restores full list; empty-state message included.
+   247→- All copy is Shivaji-College-specific, dates span Mar–May 2025, images are real Indian-context URLs from the worklog pool mapped sensibly to each story's category.
+   248→- Lint clean; ready to be wired into the router via page key "news".
+   249→
+   250→---
+   251→Task ID: EVENTS
+   252→Agent: full-stack-developer (Events page)
+   253→Task: Build the Events page.
+   254→
+   255→Work Log:
+   256→- Read worklog.md (design tokens, shared component API, Indian image URL catalog), home.tsx (page-assembly pattern incl. the 100ms force-is-visible useEffect), ui.tsx, router.tsx (useRouter + SOCIAL_LINKS.whatsapp + PageKey union), hooks.ts (useScrollReveal), site-form.tsx.
+   257→- Created /home/z/my-project/src/components/site/pages/events.tsx — "use client", exports EventsPage(), wraps content in <div ref={revealRef} className="page-enter">, copies the home page's force-visible useEffect verbatim.
+   258→- Section 1 — PageHero (eyebrow "Events", title `Where <gold>Memories</gold> Are Made`, description, hero image 6fb3150be1c0.jpg).
+   259→- Section 2 — Upcoming events (white bg). SectionHeading eyebrow "Upcoming" + title `<gold>Mark</gold> Your Calendar`. Vertical stack of 5 horizontal cards: LEFT gold date block (month + day big serif on bg-[#d4a04c]), MIDDLE title + MapPin venue + Clock time, RIGHT gold "Register" pill → contact route. All 5 events with the exact dates/titles/venues/times from the brief.
+   260→- Section 3 — Flagship events (navy bg). SectionHeading light eyebrow "Flagship", title `Our <gold>Signature</gold> Events`. Grid sm:grid-cols-2 lg:grid-cols-3 of 6 cards on bg-white/[0.04] backdrop-blur. Each card: gold icon (Music / Cpu / Trophy / Mic / Drama / Lightbulb) in gold/15 box, gold Calendar month tag pill, white serif name, white/70 description, gold "View Highlights" link → campus-life.
+   261→- Section 4 — Past events gallery (muted bg). SectionHeading eyebrow "Gallery", title `<gold>Memories</gold> Revisited`. Grid grid-cols-2 sm:grid-cols-3 of 6 .gallery-item tiles using cultural/sports/tech/grad images from the worklog catalog. Each tile: navy gradient overlay, gold Tag category pill, serif event-name + year label.
+   262→- Section 5 — By the numbers (white bg). SectionHeading centered eyebrow "By the Numbers", title `A Year of <gold>Moments</gold>`. 4-col StatItem grid (200+ Events Yearly, 50,000+ Footfall, 30+ Cultural Fests, 15+ Sports Meets) in .reveal wrapper.
+   263→- Section 6 — Host with us / venue booking (navy bg). SectionHeading light eyebrow "Host With Us", title `<gold>Book</gold> Our Venue`. Two-column: LEFT copy + 3 venue cards (750-seat Auditorium / Conference Halls / Sports Ground with Building2 / Users / Trophy icons) + NavOutlineButton(contact, light) "Enquire Now". RIGHT WhatsApp green panel — MessageCircle icon, headline, bullet perks, green (#25D366) "Chat about venue booking" button → SOCIAL_LINKS.whatsapp.
+   264→- Section 7 — Final CTA (white bg, !py-16). Centered MessageCircle icon, headline `Want event updates on <green>WhatsApp?</green>` (WhatsApp brand green #25D366 accent), subtitle, then green "Join WhatsApp List" button (SOCIAL_LINKS.whatsapp) + NavOutlineButton(news) "Read Latest News".
+   265→- Used only lucide-react icons (Calendar, MapPin, Clock, ArrowRight, ArrowUpRight, Music, Cpu, Trophy, Mic, Drama, Lightbulb, MessageCircle, Tag, Building2, Users, Sparkles). Palette strictly navy/gold/white/gray/muted cream + WhatsApp green #25D366 — no indigo, no Tailwind blue. Cards use .card-lift; gallery tiles use .gallery-item.
+   266→- Wrote work record to /home/z/my-project/agent-ctx/EVENTS-full-stack-developer.md.
+   267→- Ran `bun run lint` on events.tsx: 0 errors. Repo-wide lint shows 1 pre-existing error in careers.tsx (out of scope) and missing-page-module warnings for library/downloads/grievance (other agents' deliverables). Dev log shows clean compilation (✓ Compiled in 171ms) with no events-specific errors.
+   268→
+   269→Stage Summary:
+   270→- events.tsx complete at /home/z/my-project/src/components/site/pages/events.tsx, exporting EventsPage — ready to be mounted by the parent router (PageKey "events" already exists in router.tsx).
+   271→- All 7 required sections delivered with the exact copy, dates, venues, icon mappings, image URLs and CTAs from the brief.
+   272→- Visual style matches home.tsx exactly: same Section/SectionHeading/PageHero/Nav*Button/StatItem usage, same .reveal/.reveal-stagger + force-is-visible mount effect, same .card-lift / .gallery-item patterns, same navy/gold/white palette (WhatsApp green #25D366 used only as a brand-color accent for WhatsApp buttons).
+   273→- Responsive (mobile-first; scales through sm: and lg: breakpoints), accessible touch targets, no restricted colors.
+   274→- Lint-clean new file; route compiles on the dev server with no events-related errors.
+   275→
+   276→---
+   277→Task ID: PORTALS
+   278→Agent: full-stack-developer (My Portal + Student Portal pages)
+   279→Task: Build the My Portal landing page and the Student Portal page.
+   280→
+   281→Work Log:
+   282→- Read worklog.md for the full design system (navy #1a2744, navy-deep #121c33, gold #d4a04c; Playfair serif + Inter sans; .card-lift; .reveal/.reveal-stagger; page-enter wrapper; force-is-visible useEffect).
+   283→- Read home.tsx as the reference page-assembly pattern (useScrollReveal ref on page wrapper, 100ms mount-time force-is-visible effect, Section/SectionHeading/PageHero/Nav*Button usage).
+   284→- Read ui.tsx (Section/SectionHeading/PageHero/NavGoldButton/NavOutlineButton/StatItem signatures), router.tsx (PageKey union already includes "portal", "student-portal", "faculty-portal"; SOCIAL_LINKS.whatsapp), hooks.ts (useScrollReveal<T>() returns a ref), and site-form.tsx (FormCard pattern + INPUT_CLASS for plain inputs — used as inspiration but NOT the SiteForm component, since auth != contact).
+   285→- Created src/components/site/pages/portal.tsx ("use client", export PortalPage). Six sections:
+   286→  1. PageHero — eyebrow "My Portal", title `Your <gold>Gateway</gold> to Shivaji`, description, image 1efcc6643781.jpg.
+   287→  2. Portal choice cards (white Section, centered SectionHeading "Choose Portal / Select Your Portal"): lg:grid-cols-2. LEFT navy card with gold GraduationCap circle, "Student Portal" white serif-bold, 4 mini-bullets, gold "Login as Student" button → navigate("student-portal"). RIGHT white .card-lift card with gold Briefcase circle, "Faculty Portal" navy serif-bold, 4 mini-bullets, navy "Login as Faculty" button → navigate("faculty-portal").
+   288→  3. Quick access grid (muted Section, centered SectionHeading "Quick Access / One-Click Services"): grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 of 8 .card-lift white cards — Award/Results, CalendarCheck/Attendance, Wallet/Fees, Clock/Timetable, FileText/Assignments, BookOpen/Library, Bell/Notices, MessageSquareWarning/Grievance — each navigates to "student-portal".
+   289→  4. Portal features preview (navy Section, centered light SectionHeading "Features / Everything in One Place"): lg:grid-cols-2 of two translucent cards — "For Students" (GraduationCap + 5 gold-CheckCircle2 bullets) and "For Faculty" (Briefcase + 5 gold-CheckCircle2 bullets).
+   290→  5. Security note (white Section !py-14): centered max-w-3xl muted card with ShieldCheck gold icon, "Bank-grade security" navy serif-bold, "Your data is encrypted and never shared." gray sans.
+   291→  6. Help CTA (navy Section !py-16): centered "Trouble logging in?", subtitle, NavOutlineButton(to="contact", light) "Contact IT Helpdesk" + gold WhatsApp anchor using SOCIAL_LINKS.whatsapp.
+   292→- Created src/components/site/pages/student-portal.tsx ("use client", export StudentPortalPage). Six sections:
+   293→  1. PageHero — eyebrow "Student Portal", title `Student <gold>Login</gold>`, description, image 27da05f10395.jpg.
+   294→  2. Login + Features (white Section, lg:grid-cols-2 gap-10): LEFT a FormCard-style login card with LogIn gold icon header, plain `<form>` (NOT SiteForm) with Student ID (text required), Password (password required), Remember-me checkbox, gold "Login" button, Forgot-password gold link (navigates to "contact"), and on submit sets `submitted` state and reveals an amber-tinted inline info box "Demo portal — login is disabled in this preview. Contact the admissions office for credentials." Footer row: "New student? Contact admissions" gold link → navigate("admissions"). RIGHT SectionHeading "What You Get / Portal Features" + a 2-col .reveal-stagger grid of 6 feature cards (CalendarCheck/Attendance Tracking, Award/Results & Marksheets, Wallet/Fee Payments, Clock/Timetable, FileText/Assignments, BookOpen/Digital Library) — each with gold icon, navy serif-bold title, gray one-line desc.
+   295→  3. Stats strip (muted Section !py-14): grid-cols-2 sm:grid-cols-4 of 4 StatItem — 5000+ Active Students, 100% Online Fee, 24/7 Access (value=24 suffix="/7"), 50+ E-journals.
+   296→  4. FAQ accordion (white Section, centered SectionHeading "FAQ / Help Center"): max-w-3xl stack of 5 `<details>`/`<summary>` blocks styled to match — navy serif-bold summary + ChevronDown gold that rotates on open, gray sans body. Five FAQs covering login credentials, password reset, fee payment, attendance calculation, internal marks.
+   297→  5. Mobile app CTA (navy Section): centered Smartphone gold circle, "Access on the go", "Download the Shivaji Student App", two styled badge buttons — App Store (Apple icon) and Google Play (Play icon) — using bg-white/10 ring-white/15 hover:bg-white/15.
+   298→  6. Final CTA (white Section !py-16): centered MessageCircle gold circle, "Need help with login?", subtitle, NavOutlineButton(to="contact") "Contact IT Helpdesk", plus a row of 3 trust badges (Encrypted & secure / 24/7 access / Mobile-friendly) with gold CheckCircle2 icons.
+   299→- Followed all assembly rules strictly: `"use client"`, page-enter wrapper with revealRef, .reveal/.reveal-stagger classes throughout, copied the 100ms force-is-visible useEffect from home.tsx, no SiteHeader/SiteFooter (parent adds them), only navy/gold/white/gray/amber (for info note) + muted-cream — NO indigo/blue. All icons from lucide-react. Used `useRouter().navigate(...)` for all internal routing.
+   300→- Ran `bun run lint`: the only remaining error is a pre-existing parse error in careers.tsx (out of scope). Both portal.tsx and student-portal.tsx produce zero lint errors when checked individually with `npx eslint`. Dev log shows clean compilation for these modules.
+   301→
+   302→Stage Summary:
+   303→- Two new page components delivered:
+   304→  - `/home/z/my-project/src/components/site/pages/portal.tsx` → exports `PortalPage()` — a My Portal landing/choice page (6 sections: hero, 2 portal-choice cards, 8-tile quick-access grid, navy features preview, security note, help CTA).
+   305→  - `/home/z/my-project/src/components/site/pages/student-portal.tsx` → exports `StudentPortalPage()` — login form + features showcase (6 sections: hero, login form + features grid, stats strip, FAQ accordion, mobile app CTA, final help CTA).
+   306→- Both files match the home.tsx visual pattern exactly (Section/SectionHeading/PageHero/Nav*Button/StatItem usage, .card-lift hover, .reveal/.reveal-stagger scroll animations, force-is-visible mount effect, navy/gold/white palette, lucide icons only).
+   307→- Login form is intentionally a plain `<form>` (not SiteForm) per the spec — auth handled client-side with a `submitted` useState that toggles an amber info box explaining the demo limitation. All internal links use the hash router (`navigate("student-portal")`, `navigate("faculty-portal")`, `navigate("contact")`, `navigate("admissions")`); external WhatsApp link uses `SOCIAL_LINKS.whatsapp` from ../router.
+   308→- Pages are router-ready: PageKeys "portal" and "student-portal" already exist in router.tsx; parent page.tsx imports `PortalPage` and `StudentPortalPage` from these exact paths.
+   309→
+   310→---
+   311→Task ID: CAREERS
+   312→Agent: full-stack-developer (Careers page)
+   313→Task: Build the Careers page.
+   314→
+   315→Work Log:
+   316→- Read worklog.md (design system), home.tsx (page-enter + reveal + force-is-visible pattern), ui.tsx, router.tsx, hooks.ts, site-form.tsx, contact.tsx (form + navy info card pattern).
+   317→- Wrote src/components/site/pages/careers.tsx — single client component `CareersPage` with all 8 sections: PageHero, Why-work-with-us (4 benefit cards), Stats strip (4 StatItem), Current Openings table (6 rows, navy header, alternating white/muted rows, gold Apply anchor), Application Process (4 numbered cards), Employee testimonials (3 navy cards), Application Form (FormCard + SiteForm type="careers" with 6 fields incl. 2 selects + textarea, beside navy info card with HR email/phone/WhatsApp), Final CTA (navy with Contact HR outline + green WhatsApp button).
+   318→- Used `<div id="apply-form" className="scroll-mt-20">` wrapper around Section 7 because Section component does not accept an `id` prop (did not modify ui.tsx).
+   319→- All reveal/reveal-stagger classes wired; force-is-visible useEffect copied verbatim from home.tsx.
+   320→- Lucide icons only (Wallet, FlaskConical, HeartPulse, GraduationCap, Quote, Mail, Phone, MessageCircle, ArrowRight, ArrowUpRight). No indigo/blue; navy/gold palette throughout. WhatsApp green (#25D366) used only for the WhatsApp CTA button as specified.
+   321→- Ran `bun run lint` — clean. Ran `bunx tsc --noEmit` — no errors in careers.tsx (remaining errors are in other agents' not-yet-built modules). dev.log shows ✓ Compiled.
+   322→
+   323→Stage Summary:
+   324→- Careers page complete and lint-clean. Single file written; no other files touched. Form auto-POSTs to /api/contact (DB + email to navpreet8testing@gmail.com) via shared SiteForm. Anchor `#apply-form` wiring verified; table Apply buttons scroll to form. Responsive mobile-first layout at every section.
+   325→
+   326→---
+   327→Task ID: ALUMNI
+   328→Agent: full-stack-developer (Alumni page)
+   329→Task: Build the Alumni page for the Shivaji College website.
+   330→
+   331→Work Log:
+   332→- Read worklog.md (design system, shared component API, Indian image URLs), home.tsx (reference pattern incl. the force-is-visible useEffect), ui.tsx, router.tsx, hooks.ts and site-form.tsx.
+   333→- Created /home/z/my-project/src/components/site/pages/alumni.tsx — "use client", exports AlumniPage(), wraps content in <div ref={revealRef} className="page-enter"> using useScrollReveal<HTMLDivElement>(), and copies the home.tsx useEffect that force-adds .is-visible to above-the-fold .reveal / .reveal-stagger elements 100ms after mount.
+   334→- Section 1 — PageHero: eyebrow "Alumni Network", title "Once a Shivajian, <gold>Always a Shivajian</gold>", description about 15,000+ alumni across 40+ countries, hero image https://sfile.chatglm.cn/images-ppt/492ca6a761d6.jpg (graduation).
+   335→- Section 2 — Stats strip (muted bg, !py-16): centered SectionHeading eyebrow "Our Reach" / title "A <gold>Global</gold> Family" + reveal-stagger 4-col grid of StatItems — 15000+ Alumni, 40+ Countries, 60+ Reunions Held, 500+ Mentors.
+   336→- Section 3 — Notable Alumni (white bg): centered SectionHeading "Hall of Fame / <gold>Distinguished</gold> Alumni" + reveal-stagger sm:grid-cols-2 lg:grid-cols-3 grid of 6 alumni cards. Each card: circular avatar (h-20 w-20 rounded-full bg-[#1a2744]/5) with gold serif bold initials (AV/RM/PN/VS/SR/AK), name (navy serif bold), batch+course (gold sans uppercase), current role (gray sans), and a 1-line achievement quote prefixed by a gold border-l-2. Alumni: Dr. Anjali Verma (ISRO), Rajesh Mehta (Forbes 30 Under 40), Priya Nair (Padma Shri), Vikram Singh (Google India VP), Dr. Sunita Rao (AIIMS Dean), Arjun Kapoor (MP).
+   337→- Section 4 — Spotlight/Testimonials (navy bg): centered light SectionHeading "Spotlight / <gold>Stories</gold> That Inspire" + reveal-stagger md:grid-cols-3 of 3 testimonial cards on bg-white/[0.04] backdrop-blur. Each card: gold Quote icon (h-9 w-9), 2-3 sentence testimonial in white/85, divider, alumni name (white serif bold) + batch in gold uppercase sans.
+   338→- Section 5 — Reunions (muted bg): centered SectionHeading "Reunions / <gold>Reconnect</gold> & Relive" + reveal-stagger md:grid-cols-3 of 3 white .card-lift reunion cards. Each card: 16/10 image (gallery-item zoom) with navy gradient overlay, navy serif title, Calendar icon date, MapPin icon location, gold "Register" mailto: link with ArrowUpRight. Events: Silver Jubilee Reunion Batch 2000 (Dec 20, 2025, Main Campus), Global Alumni Meet 2026 (Jan 10, 2026, Dubai), Annual Alumni Day (Feb 14, 2026, Campus Auditorium). Images: 89e4843c9c5b.jpg (grad), 262ec3863ebd.jpg (cultural), ca508794abb9.jpg (cultural).
+   339→- Section 6 — Alumni Benefits (white bg): centered SectionHeading "Benefits / <gold>Stay Connected</gold>" + reveal-stagger sm:grid-cols-2 lg:grid-cols-4 of 4 white .card-lift cards. Each: gold lucide icon in navy-tinted box (bg-[#1a2744]/5), navy serif title, gray description. Benefits: Networking (Users, "10,000+ strong directory"), Mentorship (GraduationCap, "Guide current students"), Career Support (Briefcase, "Exclusive job board"), Library Access (BookOpen, "Lifetime library membership").
+   340→- Section 7 — Alumni Registration (muted bg): centered SectionHeading "Join Us / <gold>Register</gold> as an Alumnus" + reveal-stagger 2-col grid. LEFT: FormCard wrapping SiteForm type="alumni" with the 6 specified fields (name/email/phone/subject=Batch Year/select Course with 8 options/textarea message), submitLabel="Register Now", buttonAlign="full", successTitle="Welcome back to the Shivaji family!", successMessage ending with navpreet8testing@gmail.com. RIGHT: navy info card with email (alumni@shivajicollege.edu.in), phone (+91 11 2569 2772), WhatsApp (links to SOCIAL_LINKS.whatsapp) — each row with gold lucide icon in white/10 circle, gold uppercase label and white value. Below: "Follow the Alumni Network" row with 5 social icons (Facebook/Twitter/Instagram/LinkedIn/YouTube) opening in new tab.
+   341→- Section 8 — Newsletter + WhatsApp CTA (navy bg, !py-16, centered): serif title "Never miss a <gold>reunion</gold>", subtitle, NewsletterChip in a max-w-md container, then a green WhatsApp CTA button (style={{backgroundColor:"#25D366"}}) with MessageCircle icon + "Join Alumni WhatsApp Group" linking to SOCIAL_LINKS.whatsapp (opens new tab).
+   342→- Used only navy (#1a2744, #121c33), gold (#d4a04c, #b8862f), white, gray (#5a6478) plus green #25D366 for the WhatsApp CTA (explicitly requested). NO indigo/blue. All icons from lucide-react (Quote, Calendar, MapPin, ArrowUpRight, Users, GraduationCap, Briefcase, BookOpen, Mail, Phone, MessageCircle, Facebook, Twitter, Instagram, Linkedin, Youtube). No SiteHeader/SiteFooter (parent adds them). No other files touched.
+   343→- Wrote work record to /agent-ctx/ALUMNI-full-stack-developer.md.
+   344→- Ran `bun run lint` — 0 errors across the repo. (alumni.tsx is clean.)
+   345→- Checked dev.log — dev server compiles cleanly; the only module-not-found errors are for sibling pages (library/downloads/grievance) being authored by other agents, not alumni.
+   346→
+   347→Stage Summary:
+   348→- Alumni page complete at /home/z/my-project/src/components/site/pages/alumni.tsx, exporting AlumniPage() ready to be mounted by the parent router (PageKey "alumni" already wired in router.tsx and page.tsx).
+   349→- 8 sections delivered per spec: hero (graduation img), global stats strip, 6 notable alumni cards, 3 navy testimonial cards, 3 reunion event cards, 4 benefits cards, alumni registration form + navy contact card with social row, and navy newsletter + WhatsApp CTA.
+   350→- Reuses all shared components (Section, SectionHeading, PageHero, StatItem, SiteForm, FormCard, NewsletterChip) and follows the exact home.tsx visual pattern (page-enter wrapper, .reveal/.reveal-stagger, force-is-visible useEffect, .card-lift hover, .gallery-item zoom, .btn-gold/.btn-outline classes).
+   351→- SiteForm auto-POSTs to /api/contact, persists to DB and emails navpreet8testing@gmail.com. All Indian image URLs sourced from the worklog. Responsive (mobile-first, sm:/lg: breakpoints), accessible (aria-labels on social links, semantic <article> on reunion cards), no restricted colors.
+   352→
+   353→---
+   354→Task ID: GRIEVANCE
+   355→Agent: full-stack-developer (Grievance page)
+   356→Task: Build the Grievance Redressal page.
+   357→
+   358→Work Log:
+   359→- Read worklog.md (design tokens, shared component API, Indian image URLs), home.tsx (reference pattern), ui.tsx, router.tsx, hooks.ts and site-form.tsx to understand the design system and shared component API.
+   360→- Created src/components/site/pages/grievance.tsx as a "use client" component exporting `GrievancePage`, wrapped in a `page-enter` div with the `revealRef` from `useScrollReveal`, plus the force-is-visible `useEffect` so above-the-fold reveals appear immediately.
+   361→- Built PageHero (eyebrow "Grievance Redressal", gold-accented title "Your Voice, Our Priority", confidential/fair description) using the Indian campus image https://sfile.chatglm.cn/images-ppt/1a695321c5c0.jpeg.
+   362→- Built Grievance Committee section (white): SectionHeading (eyebrow "Committee", gold "Grievance") + a single white card listing all 5 members (Dr. Rajesh Sharma/RS Chairperson Principal, Dr. Anita Desai/AD Member English, Dr. Vikram Rao/VR Member Physics, Ms. Sunita Kapoor/SK Member Admin Officer, Mr. Arjun Mehta/AM Student Rep SU President). Each row: gold avatar circle with initials, navy serif semibold name, gold sans uppercase designation, gray sans department.
+   363→- Built How to File process (muted): centered SectionHeading (eyebrow "Process", gold "File") + 4 numbered cards (gold circle number + title + desc): Submit Form, Acknowledgement (2 days), Review & Investigation (weekly), Resolution (15 days).
+   364→- Built Categories grid (white): SectionHeading (eyebrow "Categories", gold "What") + 8 white .card-lift tiles in sm:grid-cols-2 lg:grid-cols-4 with gold lucide icons (BookOpen Academic, ShieldAlert Harassment, Building Infrastructure, FileText Administrative, BedDouble Hostel, Scale Discrimination, UserCheck Faculty, MessageSquare Other), each with a 1-line description.
+   365→- Built Grievance form (muted): SectionHeading (eyebrow "File a Grievance", gold "Submit", confidentiality/disciplinary note) + 2-col grid. LEFT: FormCard wrapping SiteForm type="grievance" with 7 fields (name, email, phone, category select x8 options, role select x6 options, subject, message textarea rows 6) and a tailored successMessage. RIGHT: navy info card with ShieldCheck gold icon "Confidentiality Assured", committee contact (grievance@shivajicollege.edu.in + COLLEGE_PHONE), full-width gold WhatsApp button (SOCIAL_LINKS.whatsapp), and a note about the anonymous suggestion box.
+   366→- Built Timely Resolution stats (white): centered SectionHeading (eyebrow "Our Commitment", gold "Timely") + 4 StatItem with .reveal (2 Days Acknowledgement, 15 Days Resolution, 100% Confidential, 0 Retaliation Policy).
+   367→- Built Anti-Ragging Notice (navy): prominent card with ShieldAlert gold icon, "Anti-Ragging Notice" heading, helpline 1800-180-5522 (tel link), antiragging@shivajicollege.edu.in (mailto link), UGC strict-action note.
+   368→- Built Final CTA (white): "Need to speak to someone?" heading + NavOutlineButton to="contact" "Contact Committee" (Users icon) + gold WhatsApp button.
+   369→- Verified no unused imports (removed useRouter/COLLEGE_EMAIL/ClipboardList/ClipboardCheck/CheckCircle2 that were not needed). Ran `bun run lint` — clean. Dev log confirms successful compilation.
+   370→
+   371→Stage Summary:
+   372→- Grievance Redressal page complete at src/components/site/pages/grievance.tsx, wired into page.tsx and compiling cleanly.
+   373→- Uses the established design system: navy #1a2744 / gold #d4a04c, Playfair serif headings, Inter sans, white rounded-xl shadow-sm .card-lift cards, .reveal/.reveal-stagger scroll animations, page-enter wrapper, force-is-visible useEffect.
+   374→- All 8 required content sections delivered: PageHero, Committee (5 members), 4-step Process, 8 Category cards, Grievance form (SiteForm type="grievance" + FormCard) with confidentiality/contact navy card, 4 StatItems, Anti-Ragging notice, Final CTA with WhatsApp.
+   375→- Form auto-POSTs to /api/contact (DB + email to navpreet8testing@gmail.com) via the shared SiteForm. No header/footer included (rendered by parent). No indigo/blue used; lucide icons throughout.
+   376→
+   377→---
+   378→Task ID: LIBRARY
+   379→Agent: full-stack-developer (Library page)
+   380→Task: Build the Library page.
+   381→
+   382→Work Log:
+   383→- Read worklog.md (design system: navy #1a2744 / navy-deep #121c33 / gold #d4a04c, Playfair serif + Inter sans, .card-lift, .gallery-item, .reveal/.reveal-stagger, .page-enter), home.tsx (reference layout/animation pattern), research.tsx (inner-page PageHero pattern), ui.tsx (Section/SectionHeading/PageHero/NavOutlineButton/StatItem API), router.tsx (useRouter, SOCIAL_LINKS.whatsapp), hooks.ts (useScrollReveal).
+   384→- Wrote src/components/site/pages/library.tsx as a "use client" page exporting LibraryPage().
+   385→- Built 8 sections in order: (1) PageHero with eyebrow "Dr. B.R. Ambedkar Library", gold-accented title "A Treasure of Knowledge", hero image f8fa351e7b80.jpg; (2) muted stats strip — SectionHeading "By the Numbers / A Wealth of Resources" + 4 StatItems (120000+ Books, 25000+ E-Journals, 5000+ Reference Titles, 300+ Seating Capacity); (3) white Collections grid — 6 .card-lift cards (General Books/BookOpen, Reference Section/BookMarked, Periodicals/Newspaper, Digital Library/Laptop, Rare Books/Gem, Book Bank/Library) each with gold icon, navy serif name, gold count, description; (4) navy E-Resources section — light SectionHeading "Digital Access" + 8 cards (N-List, DELNET, INFLIBNET, Shodhganga, National Digital Library, JSTOR, EBSCO, DOAJ) on bg-white/[0.04] with gold Globe icon; (5) muted Study Spaces gallery — 6 .gallery-item tiles (Reading Hall, Reference Section, Digital Lab, Periodicals, Discussion Room, Archive) using the Indian library images (c89dfee1ab74.png, e8c509f6af90.jpg, 6dda3c96cd6d.png, c4f4bdd16658.jpg, 9383c3cf66ed.jpg, f8fa351e7b80.jpg) with navy gradient overlay + label; (6) white Timings + Rules — 2-column grid, LEFT timings card with Clock header listing Mon–Fri 8:30 AM–8:00 PM / Sat 9:00 AM–5:00 PM / Sun Closed, RIGHT 6-rule list each with gold CheckCircle2; (7) muted Quick Services — 4 .card-lift cards (OPAC Search/Search, Inter-Library Loan/RefreshCw, Book Reservation/CalendarCheck, Photocopy/Copy); (8) navy Final CTA "Need help finding a resource?" with NavOutlineButton to="contact" (light) "Contact Librarian" + green WhatsApp button (#25D366, MessageCircle icon, SOCIAL_LINKS.whatsapp).
+   386→- Applied page-enter wrapper + revealRef, .reveal on every section block, .reveal-stagger on every grid, and copied the force-is-visible useEffect from home.tsx so above-the-fold reveals appear instantly.
+   387→- Used only lucide-react icons and the shared ui components; NO indigo/blue; navy + gold throughout; responsive grids (sm/lg breakpoints); NO header/footer (rendered by app shell).
+   388→- Ran `bun run lint` — passes with no errors. Dev log shows the library module compiles cleanly (only sibling pages faculty-portal/downloads/grievance are still pending from other agents).
+   389→
+   390→Stage Summary:
+   391→- Library page complete at src/components/site/pages/library.tsx (~330 lines), fully wired into the router via existing page.tsx import, lint-clean, and visually consistent with the site's navy/gold design system.
+   392→- All 8 required sections present with the specified copy, counts, images, icons, and color treatments; Indian library images used for hero + 6-tile gallery; WhatsApp green CTA wired to SOCIAL_LINKS.whatsapp.
+   393→
+   394→---
+   395→Task ID: FACULTY-PORTAL
+   396→Agent: full-stack-developer (Faculty Portal page)
+   397→Task: Build the Faculty Portal page.
+   398→
+   399→Work Log:
+   400→- Read worklog.md for design system (navy #1a2744 / navy-deep #121c33 / gold #d4a04c, Playfair serif + Inter sans, .card-lift, .reveal/.reveal-stagger), shared component API, and Indian image URLs.
+   401→- Studied home.tsx and student-portal.tsx as reference patterns for the portal/login layout, then read ui.tsx, router.tsx, hooks.ts and site-form.tsx to confirm shared component signatures.
+   402→- Wrote /home/z/my-project/src/components/site/pages/faculty-portal.tsx as a "use client" component exporting FacultyPortalPage, mirroring the student-portal structure (page-enter wrapper, revealRef, force-is-visible useEffect, plain <form> with useState-driven amber info box).
+   403→- Section 1 — PageHero (eyebrow "Faculty Portal", gold-spanned "Login" title, description, hero image https://sfile.chatglm.cn/images-ppt/87641eba9a3c.jpg).
+   404→- Section 2 — Login card (Faculty ID + Password + Remember me + gold Login + amber demo info box) on the left; SectionHeading "Educator Tools / Portal Features" with 6 gold-icon feature rows (Grade Submission, Attendance Management, Research Portal, Leave Application, Resource Upload, Student Analytics) on the right. "New faculty? Contact HR" link navigates to "careers".
+   405→- Section 3 — Muted stats strip: 100+ Faculty Members, 400+ Publications, 60+ Research Projects, and a custom ₹5.2Cr+ inline stat (StatItem only accepts numbers, so the rupee-prefixed stat is rendered with identical styling).
+   406→- Section 4 — Navy "Faculty Resources" section with 6 cards on bg-white/[0.04] (Academic Calendar, UGC Regulations, Syllabus Repository, Service Rules, Reimbursement Forms, Research Policies), each a .card-lift with gold icon.
+   407→- Section 5 — White "Grow Your Career" section with 4 program cards (FDPs/Hammer, Conferences/Mic, Sabbaticals/Plane, Skill Upgradation/GraduationCap) in a sm:grid-cols-2 lg:grid-cols-4 layout.
+   408→- Section 6 — Muted FAQ section with 5 styled <details>/<summary> items (navy summary + gold chevron, gray body) covering grade submission, attendance deadlines, research grants, sabbatical leave and UGC service rules.
+   409→- Section 7 — Navy final CTA "Need IT support?" with light NavOutlineButton to "contact" + a green WhatsApp button (SOCIAL_LINKS.whatsapp) + 3 reassurance checkmarks.
+   410→- Ran `bun run lint` — passed with zero errors. Verified the file is referenced correctly in src/app/page.tsx (line 22).
+   411→
+   412→Stage Summary:
+   413→- Delivered a long, rich Faculty Portal page that mirrors student-portal structure: hero, login + 6 features, 4-stat strip, 6-card navy resources grid, 4-card development programs grid, 5-item FAQ accordion, and a navy final CTA with WhatsApp support.
+   414→- All design tokens honored (navy/gold, serif headings, .card-lift, .reveal/.reveal-stagger, page-enter, force-is-visible effect); only lucide icons used; no indigo/blue; plain <form> (not SiteForm) per spec; uses shared Section/SectionHeading/PageHero/NavOutlineButton/StatItem and useRouter/SOCIAL_LINKS.
+   415→- Lint clean; dev server compiles the faculty-portal module without errors.
+   416→
+   417→---
+   418→Task ID: DOWNLOADS
+   419→Agent: full-stack-developer (Downloads page)
+   420→Task: Build the Downloads page.
+   421→
+   422→Work Log:
+   423→- Read worklog.md for the design system (navy #1a2744 / navy-deep #121c33 / gold #d4a04c), shared component API and Indian image URL list.
+   424→- Read home.tsx (page-enter wrapper, revealRef, 100 ms force-is-visible useEffect), careers.tsx (final-CTA pattern with NavOutlineButton light + WhatsApp green anchor), ui.tsx, router.tsx, hooks.ts to confirm signatures.
+   425→- Created src/components/site/pages/downloads.tsx — "use client", exports DownloadsPage(), wraps content in <div ref={revealRef} className="page-enter">, copies the force-is-visible useEffect verbatim.
+   426→- Section 1 — PageHero: eyebrow "Downloads", title `Forms, Syllabus & <span gold>Resources</span>`, the brief's description verbatim, hero image e8c509f6af90.jpg.
+   427→- Section 2 — Download Center (white): SectionHeading eyebrow="Documents" title=`<span gold>Download</span> Center`. Functional useState filter with 7 pill buttons (All / Admission Forms / Academic / Fee & Scholarships / Syllabus / Previous Papers / Brochures); "All" active gold by default; inactive pills are thin bordered white. Live result counter renders below the pills. 12 specified documents render as horizontal .card-lift row cards: LEFT gold icon (FileText for PDF/DOC, FileSpreadsheet for XLS, FileArchive for ZIP) + navy serif-semibold name + uppercase gold-dark category tag; MIDDLE type badge (PDF red / DOC navy / XLS green / ZIP amber — subtle tinted bg + ring, no blue) + gray size; RIGHT gold Download button as styled <a href="#" onClick={preventDefault}> with Download icon and aria-label. Empty-state card for "no documents in this category".
+   428→- Section 3 — Stats strip (muted, !py-14): 4 StatItem — 50+ Forms Available, 100% Free, 24/7 Access (value=24 suffix="/7"), 1-click Download (value=1 suffix="-click").
+   429→- Section 4 — How to Use These Forms (white): centered SectionHeading eyebrow="Help" title=`<span gold>How</span> to Use These Forms`. 3-step .card-lift cards (md:grid-cols-3) each with a gold-filled circle holding the serif-extrabold step number, navy serif-bold title, gray sans description. Reassurance row below: 3 CheckCircle2 + small text items (Always free / Verified by administration / Updated for 2025-26).
+   430→- Section 5 — Request a Document CTA (navy, !py-16): centered serif "Can't find what you need?" with gold accent, subtitle, button row — NavOutlineButton to="contact" light "Request a Document" + green WhatsApp anchor (#25D366, SOCIAL_LINKS.whatsapp, new tab) + tertiary gold "Go to Admissions" text button (navigate).
+   431→- Used only lucide-react icons (FileText, FileArchive, FileSpreadsheet, Download, MessageCircle, CheckCircle2). Palette strictly navy/gold/gold-dark/white/gray/muted-cream plus subtle functional red/green/amber for file-type badges — no indigo, no blue. No header/footer rendered.
+   432→- Ran `bun run lint` — clean (zero errors attributable to downloads.tsx). dev.log shows ✓ Compiled + GET / 200 after the file landed (an earlier transient "Module not found" was an HMR timing artifact that resolved on the next recompile).
+   433→
+   434→Stage Summary:
+   435→- Downloads page delivered at src/components/site/pages/downloads.tsx, exporting DownloadsPage.
+   436→- Five content sections per spec: hero, filterable download center (12 documents across 6 categories, functional useState filter pills, gold active state), 4-item stats strip, 3-step how-to-use instructions with reassurance row, navy request-a-document CTA with WhatsApp button.
+   437→- All shared components reused (Section, SectionHeading, PageHero, NavOutlineButton, StatItem); scroll-reveal hooks wired; above-the-fold force-is-visible effect copied verbatim from home.tsx.
+   438→- Fully responsive (mobile-first, sm/lg splits), accessible (aria-pressed on pills, aria-label on download links, semantic structure), and visually consistent with the home page pattern.
+   439→
+   440→---
+   441→Task ID: 3-fixes
+   442→Agent: main-orchestrator
+   443→Task: Fix user-reported issues — Indian HD images, WhatsApp overdone, mega menu arrows, hero image wrong, more length via images/animations, responsiveness.
+   444→
+   445→Work Log:
+   446→- Searched 4 new batches of HD Indian images (hero campus buildings, graduation, classroom, campus lawn). Verified via VLM that hero image 1f074f4c9e0c.jpg (3000x2000) is a modern Indian terracotta campus building.
+   447→- Fixed WhatsApp button: removed the auto-open popover hint entirely. Now a single clean floating green button (bottom-left) with subtle ping animation. No more intrusive popovers.
+   448→- Fixed mega menu arrows: removed the ChevronDown icons from desktop nav items (kept the hover dropdown behavior). Header is now compact. Arrows remain only in the mobile accordion (where they're needed for expand/collapse).
+   449→- Replaced homepage hero image: was foreign-looking campus (08e74ab42b9f.jpg), now Indian modern campus building (1f074f4c9e0c.jpg, 3000x2000 HD). Added hero-zoom slow ken-burns animation.
+   450→- Replaced homepage about image with Indian students image (87641eba9a3c.jpg). Added gallery-item zoom-on-hover class.
+   451→- Updated homepage gallery (6 images) and news (3 images) to all use genuine Indian images (cultural fests, sports, convocation, classroom).
+   452→- Added 2 new image-rich sections to homepage for more length:
+   453→  1. Parallax quote band (bg-fixed, navy overlay, inspirational quote in serif white/gold) between Programs and Why Choose Us.
+   454→  2. "Campus Stories — Moments that Define Us" 3-image feature strip with gold tags + titles + descriptions, between Campus Life gallery and News & Events.
+   455→- Added CSS animations: img-fade (image fade-in on load), hero-zoom (slow ken-burns zoom for hero images). Applied hero-zoom to both homepage hero and PageHero component (all sub-pages).
+   456→- Page height increased from ~6000px to 7475px.
+   457→- Verified mobile responsiveness (iPhone 14): header compact, hero readable, mobile menu works, navigation works.
+   458→- All buttons/links clickable and functional.
+   459→- Lint: 0 errors. Dev server: all 200 responses, no errors.
+   460→
+   461→Stage Summary:
+   462→- Hero image: Indian campus building (3000x2000 HD) ✓
+   463→- WhatsApp: clean single floating button, no popover ✓
+   464→- Mega menu: no arrows on desktop, compact header ✓
+   465→- More length: +2 image-rich sections (parallax + campus stories), page now 7475px ✓
+   466→- Animations: hero-zoom, img-fade, scroll-reveal all working ✓
+   467→- Mobile responsive ✓
+   468→- All Indian imagery ✓
+   469→
